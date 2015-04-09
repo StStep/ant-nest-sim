@@ -16,6 +16,7 @@ public class PrefabManager : MonoBehaviour {
 	public Nest nestPrefab;
 	public RottenApple applePrefab;
 	public GameObject pathPrefab;
+	public WorkerAnt workerAntPrefab;
 
 	void Awake()
 	{
@@ -91,6 +92,18 @@ public class PrefabManager : MonoBehaviour {
 		newPath.transform.rotation = rotation;
 
 		return newPath;
+	}
+
+	/// <summary>
+	/// Creates a WorkerAnt prefab at the given position,
+	/// </summary>
+	/// <returns>The spawned WorkerAnt gameobject</returns>
+	/// <param name="position">The position to spawn the gameobject at.</param>
+	public WorkerAnt CreateWorkerAnt(Vector2 position)
+	{
+		WorkerAnt newWorker = Instantiate(workerAntPrefab, position, Quaternion.identity) as WorkerAnt;
+		newWorker.Init();
+		return newWorker;
 	}
 
 }

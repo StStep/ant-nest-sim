@@ -21,7 +21,7 @@ public class NetworkManager : MonoBehaviour {
 	/// This function request a unique location ID for finding
 	/// specific nodes in the network.
 	/// </summary>
-	/// <returns>The next location I.</returns>
+	/// <returns>The next location ID.</returns>
 	public static int GetNextLocID() {
 		return (nextLocID++);
 	}

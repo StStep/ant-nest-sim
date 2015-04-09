@@ -27,7 +27,7 @@ public class Node :IEnumerable<Node> , IEquatable<Node>
 	/// <summary>
 	/// The location ID, unique for each <see cref="Node"/> object
 	/// </summary>
-	/// <value>The location I.</value>
+	/// <value>The location ID.</value>
 	public int LocID 
 	{
 		get

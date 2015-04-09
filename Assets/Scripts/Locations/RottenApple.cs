@@ -1,25 +1,29 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-
-// TODO make a higher upp class for worker assignable nodes
+// TODO make a worker assignable location class? Move in unassign workers call
 
 /// <summary>
 /// This calls represents the Nest game location
 /// </summary>
 public class RottenApple : Location {
-
-	/// <summary>
-	/// The amount of worker ants in the nest
-	/// </summary>
-	protected int workerAntCount;
+	
 
 	/// <summary>
 	/// The amount of worker ants added or removed with each click
 	/// </summary>
-	protected const int WorkerAddNumber = 10;
+	protected const int _workerAddNumber = 10;
 
+	/// <summary>
+	/// A path object holding the path from this location to the nest
+	/// </summary>
 	protected Path pathToNest;
+
+	/// <summary>
+	/// A path object holding a path from the nest to this location
+	/// </summary>
+	protected Path pathToThis;
 
 	/// <summary>
 	/// This initializes this instance, for intializaing internal objects 
@@ -28,14 +32,16 @@ public class RottenApple : Location {
 	public override void Init()
 	{
 		base.Init();
-		
-		workerAntCount = 0;
-		locationText.text = workerAntCount + " Workers";
+
+		pathToThis = null;
+		pathToNest = null;
 	}
 
 	protected override void Awake()
 	{
 		base.Awake();
+
+
 	}
 
 	/// <summary>
@@ -49,36 +55,99 @@ public class RottenApple : Location {
 	/// </para>
 	public override void ClickUp()
 	{
-		// TODO clean this up for actual usage
-		if(pathToNest == null)
-		{
-			Network tempNetwork = NetworkManager.instance.LocationNetwork;
-			pathToNest = tempNetwork.GetPath(tempNetwork.PrimaryNode, networkNode);
-		}
+		AttemptToPathToNest();
 
 		if (clickStatus == ClickType.LeftClick)
 		{
-			if(pathToNest != null)
+			if(pathToNest != null && pathToThis != null)
 			{
-				Debug.Log("You added workers to an apple");
-				workerAntCount += NetworkManager.instance.nest.TakeWorkers(WorkerAddNumber);
-				locationText.text = workerAntCount + " Workers";
+				List<WorkerAnt> takenAnts = NetworkManager.instance.nest.TakeWorkerAnts(_workerAddNumber);
+				string orderName = "Streaming to Rotten Apple ID " + LocationID.ToString();
+				foreach(WorkerAnt ant in takenAnts)
+				{
+					ant.assigned = true;
+					workerAntQ.Enqueue(ant);
+
+					ant.OrderToStream(orderName, pathToThis, pathToNest);
+				}
+				Debug.Log("You assigned " + takenAnts.Count.ToString() + " workers to Rotten Apple ID " + LocationID.ToString());
+				locationText.text = WorkerAntCount + " Workers";
+			}
+			else
+			{
+				Debug.Log ("Left clicked on Rotten Apple ID " + LocationID.ToString() + " but no paths");
 			}
 		}
 		else if (clickStatus == ClickType.RightClick)
 		{
-			if(pathToNest != null)
+			if(pathToNest != null && pathToThis != null)
 			{
-				Debug.Log("You took away workers from an apple");
-				if(workerAntCount >= WorkerAddNumber) {
-					workerAntCount -= NetworkManager.instance.nest.GiveWorkers(WorkerAddNumber);
-				}
-				else 
-				{
-					workerAntCount -= NetworkManager.instance.nest.GiveWorkers(workerAntCount);
-				}
-				locationText.text = workerAntCount + " Workers";
+				int unassignedCount = UnassignWorkerAnts(_workerAddNumber);
+				Debug.Log("You unassigned " + unassignedCount.ToString() + " workers from Rotten Apple ID " + LocationID.ToString());
+				locationText.text = WorkerAntCount + " Workers";
 			}
+			else
+			{
+				Debug.Log ("Right clicked on Rotten Apple ID " + LocationID.ToString() + " but no paths");
+			}
+		}
+	}
+
+	/// <summary>
+	/// Unassigns the worker ants and removes them from the worker ant queue
+	/// </summary>
+	/// <returns>The amount of worker ants unassigned.</returns>
+	/// <param name="amount">The amount of ants to attempt to unassign.</param>
+	protected virtual int UnassignWorkerAnts(int amount)
+	{
+		if(amount < 0)
+		{
+			return 0;
+		}
+		
+		int unassignAmount = 0;
+		if(WorkerAntCount >= amount)
+		{
+			unassignAmount = amount;
+		}
+		else
+		{
+			unassignAmount = WorkerAntCount;
+		}
+		
+		// Unasign ants from queue
+		WorkerAnt ant;
+		for(int i = 0; i < unassignAmount; i++)
+		{
+			ant = workerAntQ.Dequeue();
+			ant.assigned = false;
+		}
+		
+		// Update worker count
+		locationText.text = WorkerAntCount + " Workers";
+		return unassignAmount;
+	}
+
+	// TODO Fix this once path caching is in, should look for path update/removal, change
+
+	/// <summary>
+	/// This funcion finds the paths to the nest and back if they are
+	/// not set yet.
+	/// </summary>
+	protected void AttemptToPathToNest()
+	{
+		// Try to find a path to the this location
+		if(pathToThis == null)
+		{
+			Network tempNetwork =  NetworkManager.instance.LocationNetwork;
+			pathToThis = tempNetwork.GetPath(tempNetwork.PrimaryNode, networkNode);
+		}
+
+		// If a path to the nest doesn't exists, and path to this does, create the reverse path
+		if(pathToNest == null && pathToThis != null)
+		{
+			pathToNest = pathToThis.Clone();
+			pathToNest.Reverse();
 		}
 	}
 }
