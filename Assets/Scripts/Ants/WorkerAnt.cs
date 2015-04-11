@@ -60,7 +60,8 @@ public class WorkerAnt : Ant {
 	{
 		// Check pathing reqiurements
 		if((pathToDest[0] != returnPath[returnPath.Count - 1]) ||
-		   (pathToDest[pathToDest.Count - 1] != returnPath[0]))
+		   (pathToDest[pathToDest.Count - 1] != returnPath[0]) ||
+		   (pathToDest.Count != returnPath.Count))
 		{
 			Debug.Log("OrdStream: ERROR - given paths are not symmetrical");
 			yield break;
@@ -73,6 +74,7 @@ public class WorkerAnt : Ant {
 		while(assigned)
 		{
 			// Move from the nest to the destination location
+			int breakNode = 1;
 			for(int i = 1; i < pathToDest.Count; i++)
 			{
 				// Move to node
@@ -80,10 +82,17 @@ public class WorkerAnt : Ant {
 
 				// Enter Node 
 				yield return StartCoroutine(pathToDest[i].Location.Visit(this));
+
+				// If the ant is full after any node or needs food, return to origin, starting from current node
+				if(this.IsFull || findingFood)
+				{
+					breakNode = returnPath.Count - i;
+					break;
+				}
 			}
 
 			// Move from the nest to the destination location, skipping the first path node, where the ant should be
-			for(int i = 1; i < returnPath.Count; i++)
+			for(int i = breakNode; i < returnPath.Count; i++)
 			{
 				// Move to node
 				yield return StartCoroutine(ActMoveToPosition(returnPath[i].Position));
@@ -97,13 +106,6 @@ public class WorkerAnt : Ant {
 
 		// Enter the starting node
 		yield return StartCoroutine(pathToDest[0].Location.Enter(this));
-	
-/*		// If a nest is the start location, give self to nest
-		// TODO consider working this into the nest location enter function
-		if(pathToDest[0].Location is Nest)
-		{
-			((Nest)(pathToDest[0].Location)).GiveWorkerAntSelf(this);
-		}*/
 	}
 
 	#endregion

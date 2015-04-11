@@ -6,6 +6,8 @@ using System.Collections;
 /// </summary>
 public class RottenApple : AssignableLocation {
 
+	protected float foodAvailable;
+
 	/// <summary>
 	/// This initializes this instance, for intializaing internal objects 
 	/// before Awake() is called.
@@ -13,6 +15,10 @@ public class RottenApple : AssignableLocation {
 	public override void Init()
 	{
 		base.Init();
+
+		foodAvailable = 1000f;
+
+		lowerText.text = ((int)foodAvailable) + " Food";
 	}
 
 	protected override void Awake()
@@ -22,7 +28,7 @@ public class RottenApple : AssignableLocation {
 
 	/// <summary>
 	/// This couroutine function allows an ant to enter a location. This couroutine should be called 
-	/// by the ant when the ant wants to enter a node.
+	/// by the ant when the ant wants to enter a node. If the ant is a worker it takes food when entering.
 	/// </summary>
 	/// <param name="enteringAnt">The ant that is entering the location</param>
 	public override IEnumerator Enter(Ant enteringAnt)
@@ -32,6 +38,13 @@ public class RottenApple : AssignableLocation {
 		// Currently just a random wait
 		float waitTime = Random.Range(0.1f, 1f);
 		yield return new WaitForSeconds(waitTime);
+
+		// If worker, take what food the ant can 
+		if(enteringAnt is WorkerAnt)
+		{
+			foodAvailable -= ((WorkerAnt) enteringAnt).Take(CarryType.Food, foodAvailable);
+			lowerText.text = ((int)foodAvailable) + " Food";
+		}
 	}
 	
 	/// <summary>

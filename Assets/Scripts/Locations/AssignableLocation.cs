@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -65,7 +65,7 @@ public abstract class AssignableLocation : Location {
 					
 					ant.OrderToStream(orderName, pathToThis, pathToNest);
 				}
-				locationText.text = WorkerAntCount + " Workers";
+				upperText.text = WorkerAntCount + " Workers";
 			}
 			else
 			{
@@ -77,7 +77,7 @@ public abstract class AssignableLocation : Location {
 			if(pathToNest != null && pathToThis != null)
 			{
 				UnassignWorkerAnts(_workerAddNumber);
-				locationText.text = WorkerAntCount + " Workers";
+				upperText.text = WorkerAntCount + " Workers";
 			}
 			else
 			{
@@ -117,7 +117,7 @@ public abstract class AssignableLocation : Location {
 		}
 		
 		// Update worker count
-		locationText.text = WorkerAntCount + " Workers";
+		upperText.text = WorkerAntCount + " Workers";
 		return unassignAmount;
 	}
 	

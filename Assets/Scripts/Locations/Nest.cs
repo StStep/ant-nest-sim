@@ -9,6 +9,8 @@ public class Nest : Location {
 
 	protected const int _startingWorkerAnts = 100;
 
+	protected float foodStorage;
+
 	/// <summary>
 	/// This initializes this instance, for intializaing internal objects 
 	/// before Awake() is called.
@@ -17,9 +19,12 @@ public class Nest : Location {
 	{
 		base.Init();
 
+		foodStorage = 1000f;
+
 		// Create the initial workers
 		CreateWorkerAnts(_startingWorkerAnts);
-		locationText.text = WorkerAntCount + " Workers";
+		upperText.text = WorkerAntCount + " Workers";
+		lowerText.text = ((int)foodStorage) + " Food Stored";
 	}
 
 	protected override void Awake()
@@ -82,8 +87,36 @@ public class Nest : Location {
 		}
 
 		// Update worker count
-		locationText.text = WorkerAntCount + " Workers";
+		upperText.text = WorkerAntCount + " Workers";
 		return retList;
+	}
+
+	/// <summary>
+	/// Takes food from the food storage.
+	/// </summary>
+	/// <returns>The amount of food taken</returns>
+	/// <param name="amount">The amount of food attempted to take.</param>
+	public float TakeFood(float amount)
+	{
+		if(amount < 0f)
+		{
+			return 0f;
+		}
+
+		float takeAmount = 0;
+		if(amount < foodStorage)
+		{
+			takeAmount = amount;
+			foodStorage -= takeAmount;
+		}
+		else
+		{
+			takeAmount = foodStorage;
+			foodStorage = 0;
+		}
+		lowerText.text = ((int)foodStorage) + " Food Stored";
+
+		return takeAmount;
 	}
 
 	/// <summary>
@@ -100,7 +133,7 @@ public class Nest : Location {
 			workerAntQ.Enqueue((WorkerAnt)antAdding);
 
 			// Update worker count
-			locationText.text = WorkerAntCount + " Workers";
+			upperText.text = WorkerAntCount + " Workers";
 		}
 		else
 		{
@@ -114,6 +147,11 @@ public class Nest : Location {
 	/// <param name="amount">The desired amount of worker ants to create.</param>
 	public void CreateWorkerAnts(int amount)
 	{
+		if(amount < 0)
+		{
+			return;
+		}
+
 		WorkerAnt tempAnt;
 		for(int i = 0; i < amount; i++)
 		{
@@ -142,6 +180,24 @@ public class Nest : Location {
 		{
 			AddToNest(enteringAnt);
 		}
+
+		// If ant is carrying food, give it to the nest
+		float giveAmount = 0f;
+		if(enteringAnt.carryType == CarryType.Food)
+		{
+			giveAmount = enteringAnt.GiveAll();
+			foodStorage += giveAmount;
+		}
+
+		// Eat if it needs to
+		float eatAmount = enteringAnt.eat(foodStorage);
+		foodStorage -= eatAmount;
+		if(eatAmount != 0 || giveAmount != 0)
+		{
+			lowerText.text = ((int)foodStorage) + " Food Stored";
+		}
+
+		enteringAnt.inNest = true;
 	}
 
 	/// <summary>
@@ -153,8 +209,18 @@ public class Nest : Location {
 	{
 		exitingAnt.Unhide();
 
+		// Eat if it needs to
+		float eatAmount = exitingAnt.eat(foodStorage);
+		foodStorage -= eatAmount;
+		if(eatAmount != 0f) 
+		{
+			lowerText.text = ((int)foodStorage) + " Food Stored";
+		}
+
 		// Currently just a random wait
 		float waitTime = Random.Range(0.1f, 1f);
 		yield return new WaitForSeconds(waitTime);
+
+		exitingAnt.inNest = false;
 	}
 }

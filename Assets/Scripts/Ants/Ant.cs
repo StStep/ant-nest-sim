@@ -2,15 +2,57 @@
 using System.Collections;
 using System;
 
+public enum CarryType { None, Food};
+
 /// <summary>
 /// This class is used to represent an ant unit in the game.
 /// </summary>
-public class Ant : MonoBehaviour {
-
+public class Ant : MonoBehaviour , IEquatable<Ant>
+{
 	/// <summary>
 	/// The time for an ant to move 1 unit
 	/// </summary>
-	public float moveTime = .5f;
+	public const float moveTime = .5f;
+
+	/// <summary>
+	/// The amount of energy the ant the ant uses a second
+	/// </summary>
+	public const float energyUsageSec = .25f;
+
+	/// <summary>
+	/// The carry capacity of the ant.
+	/// </summary>
+	public const float carryCapacity = 10f;
+
+	/// <summary>
+	/// The carry capacity of the ant.
+	/// </summary>
+	public const float foodEnegryCapacity = 1f;
+
+	/// <summary>
+	/// The type stuff the ant is carrying.
+	/// </summary>
+	public CarryType carryType;
+
+	/// <summary>
+	/// The time in seconds between ant updates
+	/// </summary>
+	public const float SecForAntUpdate = .5f;
+
+	/// <summary>
+	/// The energy usage per ant update.
+	/// </summary>
+	protected const float EnergyUsedPerAntUpdate = energyUsageSec*SecForAntUpdate;
+
+	/// <summary>
+	/// The current amount being carried by the ant.
+	/// </summary>
+	protected float carryAmount;
+
+	/// <summary>
+	/// The amount of energy due to food the ant has
+	/// </summary>
+	protected float foodEnergy;
 
 	/// <summary>
 	/// The inverse move time, pre-calculated for efficiency
@@ -21,6 +63,11 @@ public class Ant : MonoBehaviour {
 	/// The current order the ant is following.
 	/// </summary>
 	protected string currentOrder;
+
+	/// <summary>
+	/// If the ant is trying to find food
+	/// </summary>
+	protected bool findingFood;
 
 	/// <summary>
 	/// Gets a value that is false if the ant is under an order, true if it
@@ -34,6 +81,11 @@ public class Ant : MonoBehaviour {
 			return String.IsNullOrEmpty(currentOrder);
 		}
 	}
+
+	/// <summary>
+	/// This is true if the ant is in a nest. 
+	/// </summary>
+	public bool inNest;
 
 	/// <summary>
 	/// This variable is true if the ant is currently assigned to a location. If false
@@ -52,6 +104,18 @@ public class Ant : MonoBehaviour {
 		get
 		{
 			return _antID;
+		}
+	}
+
+	/// <summary>
+	/// Gets a value indicating whether the ant is full to capcaity.
+	/// </summary>
+	/// <value><c>true</c> if this instance is full; otherwise, <c>false</c>.</value>
+	public bool IsFull
+	{
+		get
+		{
+			return ((carryCapacity - carryAmount) < float.Epsilon) ? true : false;
 		}
 	}
 
@@ -75,6 +139,10 @@ public class Ant : MonoBehaviour {
 		currentOrder = "";
 		assigned = false;
 		inverseMoveTime = 1f / moveTime;
+		foodEnergy = foodEnegryCapacity;
+		carryAmount = 0f;
+		carryType = CarryType.None;
+		findingFood = false;
 	}
 
 	// Use this for initialization
@@ -90,12 +158,52 @@ public class Ant : MonoBehaviour {
 		//Get a component references
 		rb2D = GetComponent <Rigidbody2D> ();
 		spriteRender = GetComponent <SpriteRenderer> ();
+
+		// Ant starts in the nest
+		inNest = true;
 		Hide();
+
+		// Start the ant update
+		StartCoroutine(AntUpdate());
 	}
 	
 	// Update is called once per frame
-	protected virtual void Update () {
-	
+	protected virtual void Update () 
+	{
+
+	}
+
+	/// <summary>
+	/// This coroutine is used for updating the state of the ant. It happends less often
+	/// then Update, and is for a coarser update schedule for ant specific states.
+	/// </summary>
+	/// <returns>Returns IEnumerator, intended to be used as a coroutine.</returns>
+	protected virtual IEnumerator AntUpdate()
+	{
+		for(;;)
+		{
+			// Determine food take location
+			float energyDeficiet = 0f;
+			if(inNest) {
+				energyDeficiet = EnergyUsedPerAntUpdate - NetworkManager.instance.nest.TakeFood(EnergyUsedPerAntUpdate);
+			}
+
+			if(foodEnergy > 0)
+			{
+				foodEnergy -= energyDeficiet;
+			}
+			else if(findingFood)
+			{
+				foodEnergy = 0;
+			}
+			else
+			{
+				foodEnergy = 0;
+				findingFood = true;
+			}
+
+			yield return new WaitForSeconds(SecForAntUpdate);
+		}
 	}
 
 	/// <summary>
@@ -112,6 +220,78 @@ public class Ant : MonoBehaviour {
 	public void Unhide()
 	{
 		spriteRender.enabled = true;
+	}
+
+	/// <summary>
+	/// The ant tries to take the given amount of CarryType. It will only carry
+	/// more of the current carry type, and will not go above it's capacity.
+	/// </summary>
+	/// <param name="amount">The total available stuff the ant could carry.</param>
+	/// <returns>The amount the ant takes.</returns>
+	public float Take(CarryType type, float amount)
+	{
+		// Only take more of the current carry type
+		if((type != carryType && carryType != CarryType.None) || (amount < 0f))
+		{
+			return 0f;
+		}
+
+		// Take as much as is available and the ant can carry
+		carryType = type;
+		float takeAmount;
+		if(amount >= (carryCapacity - carryAmount))
+		{
+			takeAmount = (carryCapacity - carryAmount);
+			carryAmount = carryCapacity;
+		}
+		else
+		{
+			takeAmount = amount;
+			carryAmount = carryAmount + amount;
+		}
+
+		return takeAmount;
+	}
+
+	/// <summary>
+	/// Eat the specified amount.
+	/// </summary>
+	/// <param name="amount">The total amount of food available to be eaten.</param>
+	public float eat(float amount)
+	{		
+		if(amount < 0)
+		{
+			return 0f;
+		}
+
+		// Eat as much as the ant can
+		float eatAmount;
+		if(amount >= (foodEnegryCapacity - foodEnergy))
+		{
+			eatAmount = (foodEnegryCapacity - foodEnergy);
+			foodEnergy = foodEnegryCapacity;
+		}
+		else
+		{
+			eatAmount = amount;
+			foodEnergy = foodEnergy + amount;
+		}
+
+		findingFood = false;
+		
+		return eatAmount;
+	}
+
+	/// <summary>
+	/// The ant gives up everything it is carrying, and returns to carrying nothing.
+	/// </summary>
+	/// <returns>The amount of the current ant carry type given.</returns>
+	public float GiveAll()
+	{
+		float amount = carryAmount;
+		carryAmount = 0f;
+		carryType = CarryType.None;
+		return amount;
 	}
 
 	#region Coroutine Actions
@@ -163,4 +343,15 @@ public class Ant : MonoBehaviour {
 	}
 
 	#endregion
+
+	/// <summary>
+	/// Determines whether the specified <see cref="Ant"/> is equal to the current <see cref="Ant"/>.
+	/// </summary>
+	/// <param name="ant">The <see cref="Ant"/> to compare with the current <see cref="Ant"/>.</param>
+	/// <returns><c>true</c> if the specified <see cref="Ant"/> is equal to the current <see cref="Ant"/>; otherwise, <c>false</c>.</returns>
+	public bool Equals(Ant ant)
+	{
+		if (ant == null) return false;
+		return (this.AntID.Equals(ant.AntID));
+	}
 }

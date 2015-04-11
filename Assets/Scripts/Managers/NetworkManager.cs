@@ -34,7 +34,7 @@ public class NetworkManager : MonoBehaviour {
 	/// <summary>
 	/// The Nest, the primary node of the network.
 	/// </summary>
-	public Nest nest;
+	[HideInInspector]public Nest nest;
 
 	//TODO this a temp creation method 
 	public Vector2[] appleVecList;

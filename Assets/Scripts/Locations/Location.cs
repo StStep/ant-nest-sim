@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -6,12 +7,18 @@ using UnityEngine.UI;
 /// <summary>
 /// This is the abstract class for game locations. Locations manage the ants assigned to them.
 /// </summary>
-public abstract class Location : MonoBehaviour {
+public abstract class Location : MonoBehaviour , IEquatable<Location>
+{
 
 	/// <summary>
 	/// The text object displayed above the location
 	/// </summary>
-	public Text locationText;
+	public Text upperText;
+
+	/// <summary>
+	/// The text object displayed above the location
+	/// </summary>
+	public Text lowerText;
 
 	/// <summary>
 	/// The node object representing this location in the network.
@@ -67,7 +74,7 @@ public abstract class Location : MonoBehaviour {
 		networkNode = new Node(this);
 		workerAntQ = new Queue<WorkerAnt>();
 
-		locationText.text = WorkerAntCount + " Workers";
+		upperText.text = WorkerAntCount + " Workers";
 	}
 
 	protected virtual void Awake()
@@ -158,4 +165,15 @@ public abstract class Location : MonoBehaviour {
 	/// </summary>
 	/// <param name="exitingAnt">The ant that is exiting the location</param>
 	public abstract IEnumerator Exit(Ant exitingAnt);
+
+	/// <summary>
+	/// Determines whether the specified <see cref="Location"/> is equal to the current <see cref="Location"/>.
+	/// </summary>
+	/// <param name="node">The <see cref="Location"/> to compare with the current <see cref="Location"/>.</param>
+	/// <returns><c>true</c> if the specified <see cref="Location"/> is equal to the current <see cref="Location"/>; otherwise, <c>false</c>.</returns>
+	public bool Equals(Location location)
+	{
+		if (location == null) return false;
+		return (this.networkNode.Equals(location.networkNode));
+	}
 }
