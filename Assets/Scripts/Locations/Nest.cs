@@ -43,11 +43,6 @@ public class Nest : Location {
 		}
 	}
 
-	// TODO Need to handle ants that haven't returned to nest yet from last assignment
-	// Currently ants are not assigned when finishing an assigment, and
-	// only return to be assigning when making it back to the nest
-	// Therefore the count above the nest will be workers 'inside' of it
-
 	/// <summary>
 	/// This function removes workers up to the paramter, if able, 
 	/// and returns a list of the worker ants.
@@ -92,17 +87,25 @@ public class Nest : Location {
 	}
 
 	/// <summary>
-	/// This Adds the worker ant parameter to the Nest. Inteded to be called
-	/// by worker ants once they finish an assignemt, and have returned to the nest.
+	/// This adds the ant parameter to the Nest. The ant enters the proper
+	/// queue for its morphology.
 	/// </summary>
-	/// <param name="worker">The worker ant object entering the nest</param>
-	public void GiveWorkerAntSelf(WorkerAnt worker)
+	/// <param name="antAdding">The ant object entering the nest</param>
+	public void AddToNest(Ant antAdding)
 	{
-		// Add to q
-		workerAntQ.Enqueue(worker);
+		// Sort by morphology
+		if(antAdding is WorkerAnt)
+		{
+			// Add to q
+			workerAntQ.Enqueue((WorkerAnt)antAdding);
 
-		// Update worker count
-		locationText.text = WorkerAntCount + " Workers";
+			// Update worker count
+			locationText.text = WorkerAntCount + " Workers";
+		}
+		else
+		{
+			Debug.Log("AddToNest: ERROR - unknown ant morph adding to nest");
+		}
 	}
 
 	/// <summary>
@@ -114,9 +117,44 @@ public class Nest : Location {
 		WorkerAnt tempAnt;
 		for(int i = 0; i < amount; i++)
 		{
-			tempAnt = PrefabManager.instance.CreateWorkerAnt(transform.position);
+			tempAnt = PrefabManager.instance.CreateWorkerAntObject(transform.position);
 			workerAntQ.Enqueue(tempAnt);
 			tempAnt.transform.parent = transform;
 		}
+	}
+
+	/// <summary>
+	/// This couroutine function allows an ant to enter a location. This couroutine should be called 
+	/// by the ant when the ant wants to enter a node. If the entering ant is idle, the
+	/// ant is added to the nest.
+	/// </summary>
+	/// <param name="enteringAnt">The ant that is entering the location</param>
+	public override IEnumerator Enter(Ant enteringAnt)
+	{
+		enteringAnt.Hide();
+
+		// Currently just a random wait
+		float waitTime = Random.Range(0.1f, 1f);
+		yield return new WaitForSeconds(waitTime);
+
+		// If the ant is idle, add it to the nest
+		if(enteringAnt.IsIdle)
+		{
+			AddToNest(enteringAnt);
+		}
+	}
+
+	/// <summary>
+	/// This couroutine function allows an ant to exit a location. This couroutine should be called 
+	/// by the ant when the ant wants to leave a node.
+	/// </summary>
+	/// <param name="exitingAnt">The ant that is exiting the location</param>
+	public override IEnumerator Exit(Ant exitingAnt)
+	{
+		exitingAnt.Unhide();
+
+		// Currently just a random wait
+		float waitTime = Random.Range(0.1f, 1f);
+		yield return new WaitForSeconds(waitTime);
 	}
 }

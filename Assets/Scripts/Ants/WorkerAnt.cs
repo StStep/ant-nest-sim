@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class WorkerAnt : Ant {
@@ -10,13 +10,14 @@ public class WorkerAnt : Ant {
 	}
 
 	// Use this for initialization
-	void Start () {
+	protected override void Start() {
+		base.Start();
 	
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
+	protected override void  Update() {
+		base.Update();
 	}
 
 	/// <summary>
@@ -24,9 +25,9 @@ public class WorkerAnt : Ant {
 	/// </summary>
 	/// <returns><c>true</c>, if to stream was ordered, <c>false</c> otherwise.</returns>
 	/// <param name="orderName">The name of the order.</param>
-	/// <param name="toDest">The path that is from the nest to the destination location.</param>
-	/// <param name="toNest">The path that is from the destination location to the nest.</param>
-	public bool OrderToStream(string orderName, Path toDest, Path toNest)
+	/// <param name="pathToDest">The path that is from the start location to the destination location.</param>
+	/// <param name="returnPath">The path that is from the destination location to the start location.</param>
+	public bool OrderToStream(string orderName, Path pathToDest, Path returnPath)
 	{
 		bool success = false;
 
@@ -34,7 +35,7 @@ public class WorkerAnt : Ant {
 		if(IsIdle)
 		{
 			currentOrder = orderName;
-			StartCoroutine(OrdStream(toDest, toNest));
+			StartCoroutine(OrdStream(pathToDest, returnPath));
 			success = true;
 		}
 
@@ -47,50 +48,62 @@ public class WorkerAnt : Ant {
 	/// The order coroutine that has the ant continuously walk back and forth the given paths.
 	/// </summary>
 	/// <returns>Returns IEnumerator, intended to be used as a coroutine.</returns>
-	/// <param name="toDest">The path that is from the nest to the destination location.</param>
-	/// <param name="toNest">The path that is from the destination location to the nest.</param>
+	/// <param name="pathToDest">The path that is from the start location to the destination location.</param>
+	/// <param name="returnPath">The path that is from the destination location to the start location.</param>
 	/// <para>
-	/// This coroutine has the ant moving along each path, starting from the nest,
+	/// This coroutine has the ant moving along each path, starting from the start location,
 	/// going to the destination location, and then turning around to go
-	/// back to the nest. This order can be naturally finished by setting the ant's
-	/// currentlyAssigned variable to false. In that instance, the ant will end 
-	/// the order at the nest.
+	/// back to the start location. The starting location is exited at the before the 
+	/// movement loop, and entered at the after the loop ends. Each node in between is visited.
 	/// </para>
-	protected IEnumerator OrdStream(Path toDest, Path toNest)
+	protected IEnumerator OrdStream(Path pathToDest, Path returnPath)
 	{
+		// Check pathing reqiurements
+		if((pathToDest[0] != returnPath[returnPath.Count - 1]) ||
+		   (pathToDest[pathToDest.Count - 1] != returnPath[0]))
+		{
+			Debug.Log("OrdStream: ERROR - given paths are not symmetrical");
+			yield break;
+		}
 
-		// TODO this is temporary to create visual nice-ness and to avoid clumping
-		// Later build a delay in to processing, arriving at each location
-		float waitTime = Random.Range(0.1f, 1f);
-
-		ExitNest();
+		// Exit the starting node
+		yield return StartCoroutine(pathToDest[0].Location.Exit(this));
 
 		// Repeat movement until no longer assigned to order
 		while(assigned)
 		{
-			yield return new WaitForSeconds(waitTime);
-
 			// Move from the nest to the destination location
-			foreach(Node node in toDest)
+			for(int i = 1; i < pathToDest.Count; i++)
 			{
 				// Move to node
-				yield return StartCoroutine(ActMoveToPosition(node.Position));
+				yield return StartCoroutine(ActMoveToPosition(pathToDest[i].Position));
+
+				// Enter Node 
+				yield return StartCoroutine(pathToDest[i].Location.Visit(this));
 			}
 
-			yield return new WaitForSeconds(waitTime);
-
-			// Move from the destination location to the nest
-			foreach(Node node in toNest)
+			// Move from the nest to the destination location, skipping the first path node, where the ant should be
+			for(int i = 1; i < returnPath.Count; i++)
 			{
 				// Move to node
-				yield return StartCoroutine(ActMoveToPosition(node.Position));
+				yield return StartCoroutine(ActMoveToPosition(returnPath[i].Position));
+
+				// Enter Node 
+				yield return StartCoroutine(returnPath[i].Location.Visit(this));
 			}
 		}
-
-		// Go idle and enter nest
+		// Go idle having finished movement
 		currentOrder = "";
-		NetworkManager.instance.nest.GiveWorkerAntSelf(this);
-		EnterNest();
+
+		// Enter the starting node
+		yield return StartCoroutine(pathToDest[0].Location.Enter(this));
+	
+/*		// If a nest is the start location, give self to nest
+		// TODO consider working this into the nest location enter function
+		if(pathToDest[0].Location is Nest)
+		{
+			((Nest)(pathToDest[0].Location)).GiveWorkerAntSelf(this);
+		}*/
 	}
 
 	#endregion

@@ -58,12 +58,12 @@ public class Ant : MonoBehaviour {
 	/// <summary>
 	/// The sprite renderer.
 	/// </summary>
-	public SpriteRenderer spriteRender;
+	protected SpriteRenderer spriteRender;
 
 	/// <summary>
 	/// The 2D rigid body for the ant
 	/// </summary>
-	public Rigidbody2D rb2D;	
+	protected Rigidbody2D rb2D;	
 
 	/// <summary>
 	/// Initialize the ant gameobject, this should be called
@@ -78,7 +78,7 @@ public class Ant : MonoBehaviour {
 	}
 
 	// Use this for initialization
-	void Start () 
+	protected virtual void Start () 
 	{
 	
 		// If init was not called for this object yet, call it
@@ -88,22 +88,20 @@ public class Ant : MonoBehaviour {
 		}
 
 		//Get a component references
-		// rb2D = GetComponent <Rigidbody2D> (); TODO Why doesn't this work?
-		//spriteRender = GetComponent <SpriteRenderer> ();
-
-		// Start in the nest, not visible
-		EnterNest();
+		rb2D = GetComponent <Rigidbody2D> ();
+		spriteRender = GetComponent <SpriteRenderer> ();
+		Hide();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	protected virtual void Update () {
 	
 	}
 
 	/// <summary>
 	/// This function causes the ant to be visible in the game space.
 	/// </summary>
-	public void EnterNest()
+	public void Hide()
 	{
 		spriteRender.enabled = false;
 	}
@@ -111,7 +109,7 @@ public class Ant : MonoBehaviour {
 	/// <summary>
 	/// This function causes the ant to no longer be visible in the game space.
 	/// </summary>
-	public void ExitNest()
+	public void Unhide()
 	{
 		spriteRender.enabled = true;
 	}

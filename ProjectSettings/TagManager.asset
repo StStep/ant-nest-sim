@@ -44,8 +44,11 @@ TagManager:
   - name: Ground
     uniqueID: 4228358325
     locked: 0
-  - name: NodeMarker
+  - name: Path
     uniqueID: 761366953
+    locked: 0
+  - name: Ant
+    uniqueID: 2412182841
     locked: 0
   - name: NodeObject
     uniqueID: 1710211417

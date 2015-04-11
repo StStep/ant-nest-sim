@@ -39,7 +39,7 @@ public class PrefabManager : MonoBehaviour {
 	/// </summary>
 	/// <returns>The spawned Nest gameobject</returns>
 	/// <param name="position">The position to spawn the gameobject at.</param>
-	public Nest CreateNest(Vector2 position)
+	public Nest CreateNestObject(Vector2 position)
 	{
 		Nest newNest = Instantiate(nestPrefab, position, Quaternion.identity) as Nest;
 		newNest.Init();
@@ -51,14 +51,12 @@ public class PrefabManager : MonoBehaviour {
 	/// </summary>
 	/// <returns>The spawned RottenApple gameobject</returns>
 	/// <param name="position">The position to spawn the gameobject at.</param>
-	public RottenApple CreateApple(Vector2 position)
+	public RottenApple CreateAppleObject(Vector2 position)
 	{
 		RottenApple newApple = Instantiate(applePrefab, position, Quaternion.identity) as RottenApple;
 		newApple.Init();
 		return newApple;
 	}
-	
-	// TODO Path can use nodeLocation info of nodes?
 
 	/// <summary>
 	/// Creates a Path prefab connected the nodes at the given positions,
@@ -70,7 +68,7 @@ public class PrefabManager : MonoBehaviour {
 	/// This function spawns a Path gameobject with the proper position, rotation,  
 	/// and scale to connect the nodes at the provided positions
 	/// </para>
-	public GameObject CreatePath(Vector2 startPosition, Vector2 endPosition)
+	public GameObject CreatePathObject(Vector2 startPosition, Vector2 endPosition)
 	{
 		// Calculate middle point and rotation bewteen positions
 		Vector2 direction = endPosition - startPosition;
@@ -99,7 +97,7 @@ public class PrefabManager : MonoBehaviour {
 	/// </summary>
 	/// <returns>The spawned WorkerAnt gameobject</returns>
 	/// <param name="position">The position to spawn the gameobject at.</param>
-	public WorkerAnt CreateWorkerAnt(Vector2 position)
+	public WorkerAnt CreateWorkerAntObject(Vector2 position)
 	{
 		WorkerAnt newWorker = Instantiate(workerAntPrefab, position, Quaternion.identity) as WorkerAnt;
 		newWorker.Init();

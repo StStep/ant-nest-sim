@@ -133,4 +133,29 @@ public abstract class Location : MonoBehaviour {
 			Debug.Log("You right clicked on a node");
 		}
 	}
+
+	/// <summary>
+	/// This couroutine function allows an ant to visit a location. A visit consists of a
+	/// consecutive enter cooroutine and exit cooroutine.
+	/// </summary>
+	/// <param name="visitingAnt">The ant that is visiting the location</param>
+	public IEnumerator Visit(Ant visitingAnt)
+	{
+		yield return StartCoroutine(this.Enter(visitingAnt));
+		yield return StartCoroutine(this.Exit(visitingAnt));
+	}
+
+	/// <summary>
+	/// This couroutine function allows an ant to enter a location. This couroutine should be called 
+	/// by the ant when the ant wants to enter a node.
+	/// </summary>
+	/// <param name="enteringAnt">The ant that is entering the location</param>
+	public abstract IEnumerator Enter(Ant enteringAnt);
+
+	/// <summary>
+	/// This couroutine function allows an ant to exit a location. This couroutine should be called 
+	/// by the ant when the ant wants to leave a node.
+	/// </summary>
+	/// <param name="exitingAnt">The ant that is exiting the location</param>
+	public abstract IEnumerator Exit(Ant exitingAnt);
 }

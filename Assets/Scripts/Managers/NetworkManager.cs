@@ -62,15 +62,15 @@ public class NetworkManager : MonoBehaviour {
 	/// </summary>
 	private void CreateNetwork()
 	{
-		nest = PrefabManager.instance.CreateNest(Vector2.zero);
+		nest = PrefabManager.instance.CreateNestObject(Vector2.zero);
 		nest.transform.SetParent(transform);
-		LocationNetwork = new Network(nest.networkNode);
+		LocationNetwork = new Network();
 		
 		// TODO Temp Create network
 		RottenApple[] tempApples = new RottenApple[appleVecList.Length];
 		for(int i = 0; i < appleVecList.Length; i++)
 		{
-			tempApples[i] = PrefabManager.instance.CreateApple(appleVecList[i]);
+			tempApples[i] = PrefabManager.instance.CreateAppleObject(appleVecList[i]);
 			tempApples[i].transform.SetParent(transform);
 		}
 
@@ -88,7 +88,7 @@ public class NetworkManager : MonoBehaviour {
 		foreach(Location location in childrenNodes)
 		{
 			LocationNetwork.ConnectNodes(parentNode.networkNode, location.networkNode);
-			temPath = PrefabManager.instance.CreatePath(parentNode.transform.position, location.transform.position);
+			temPath = PrefabManager.instance.CreatePathObject(parentNode.transform.position, location.transform.position);
 			temPath.transform.SetParent(transform);
 		}
 	}

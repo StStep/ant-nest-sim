@@ -7,9 +7,8 @@ using System.Collections.Generic;
 /// <para>
 /// This class can save a network of objects of the <see cref="Node"/> class, and can 
 /// search through the network, finding and returning a <see cref="Path"/> using A* search method.
-/// The network is created around a primary node, and further nodes are
-/// added with calls to ConnectNodes() which handles the inter-node connections
-/// necessary for traversing the network. The function GetPath() returns a Path
+/// After the network is created nodes are added with calls to ConnectNodes() which handles 
+/// the inter-node connections necessary for traversing the network. The function GetPath() returns a Path
 /// object if a path can be found between the two provided nodes.
 /// </para>
 /// <remarks>
@@ -18,38 +17,19 @@ using System.Collections.Generic;
 /// being frequent.
 /// </remarks>
 public class Network {
-
-	// TODO 
-	// Store a cache of past path searches, clearing the path list when the network changes
+	  
+	// TODO Store a cache of past path searches, clearing the path list when the network changes
 	// As a way of avoiding doing A* searches for the same destination/start or the compliment
 
 	/// A dictionary of nodes in the network, using the location ID of the nodes 
 	protected Dictionary<int, Node> _netNodes;
 
-	/// The first node in the network
-	// TODO This isn't really even used now, holdover from past project, use or remove
-	protected Node _primaryNode;
-	/// The first node in the network
-	public Node PrimaryNode
-	{
-		get
-		{
-			return _primaryNode;
-		}
-	}
-
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Network"/> class around a primary <see cref="Node"/>.
 	/// </summary>
 	/// <param name="primaryNode">The node to center the network around.</param>
-	public Network(Node primaryNode) {
+	public Network() {
 		_netNodes = new Dictionary<int, Node>();
-
-		_primaryNode = primaryNode;
-		if(_primaryNode != null)
-		{
-			_netNodes[_primaryNode.LocID] = _primaryNode;
-		}
 	}
 
 	// This function connects all of the child nodes 
