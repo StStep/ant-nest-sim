@@ -48,9 +48,10 @@ public abstract class Location : MonoBehaviour , IEquatable<Location>
 	protected ClickType clickStatus;
 
 	/// <summary>
-	/// This is a queue of worker ants assigned to this location
+	/// This is a list of worker ants assigned to this location. Ants are inserted
+	/// at the beggening and removed from the end.
 	/// </summary>
-	protected Queue<WorkerAnt> workerAntQ;
+	protected List<WorkerAnt> workerAntList;
 
 	/// <summary>
 	/// Gets the amount worker ants assigned to this location
@@ -60,7 +61,7 @@ public abstract class Location : MonoBehaviour , IEquatable<Location>
 	{
 		get
 		{
-			return workerAntQ.Count;
+			return workerAntList.Count;
 		}
 	}
 
@@ -72,7 +73,7 @@ public abstract class Location : MonoBehaviour , IEquatable<Location>
 	{
 		clickStatus = ClickType.NoClick;
 		networkNode = new Node(this);
-		workerAntQ = new Queue<WorkerAnt>();
+		workerAntList = new List<WorkerAnt>();
 
 		upperText.text = WorkerAntCount + " Workers";
 	}
@@ -165,6 +166,23 @@ public abstract class Location : MonoBehaviour , IEquatable<Location>
 	/// </summary>
 	/// <param name="exitingAnt">The ant that is exiting the location</param>
 	public abstract IEnumerator Exit(Ant exitingAnt);
+
+	/// <summary>
+	/// This function removes a specific ant from a location list.
+	/// </summary>
+	/// <param name="antToRemove">The ant to remove.</param>
+	public void RemoveAnt(Ant antToRemove)
+	{
+		if(antToRemove is WorkerAnt)
+		{
+			workerAntList.Remove((WorkerAnt)antToRemove);
+			upperText.text = WorkerAntCount + " Workers";
+		}
+		else
+		{
+			Debug.Log("RemoveAnt: ERROR - Unknwin ant class");
+		}
+	}
 
 	/// <summary>
 	/// Determines whether the specified <see cref="Location"/> is equal to the current <see cref="Location"/>.

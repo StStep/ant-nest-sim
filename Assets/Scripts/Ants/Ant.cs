@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using Random = UnityEngine.Random;
 
 public enum CarryType { None, Food};
 
@@ -30,6 +31,16 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	public const float foodEnegryCapacity = 1f;
 
 	/// <summary>
+	/// The minimum lifespan of an ant in seconds
+	/// </summary>
+	public const float minLifespan = 20f;
+
+	/// <summary>
+	/// The maximum lifespan of an ant in seconds
+	/// </summary>
+	public const float maxLifespan = 40f;
+
+	/// <summary>
 	/// The type stuff the ant is carrying.
 	/// </summary>
 	public CarryType carryType;
@@ -43,6 +54,11 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	/// The energy usage per ant update.
 	/// </summary>
 	protected const float EnergyUsedPerAntUpdate = energyUsageSec*SecForAntUpdate;
+
+	/// <summary>
+	/// The location that this ant is assigned to
+	/// </summary>
+	public Location assignedLocation;
 
 	/// <summary>
 	/// The current amount being carried by the ant.
@@ -67,7 +83,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	/// <summary>
 	/// If the ant is trying to find food
 	/// </summary>
-	protected bool findingFood;
+	protected bool isStarving;
 
 	/// <summary>
 	/// Gets a value that is false if the ant is under an order, true if it
@@ -130,23 +146,65 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	protected Rigidbody2D rb2D;	
 
 	/// <summary>
+	/// The calculated lifespan for the ant in seconds
+	/// </summary>
+	protected float lifeSpan;
+
+	/// <summary>
+	/// The time in seconds the and has been alive
+	/// </summary>
+	protected float timeAlive;
+
+	/// <summary>
 	/// Initialize the ant gameobject, this should be called
 	/// after instantiation.
 	/// </summary>
 	public virtual void Init()
 	{
 		_antID = GameManager.GetNextAntID();
+		inverseMoveTime = 1f / moveTime;
+		enabled = false;
+		ResetState();
+	}
+
+	protected void ResetState()
+	{
 		currentOrder = "";
 		assigned = false;
-		inverseMoveTime = 1f / moveTime;
 		foodEnergy = foodEnegryCapacity;
 		carryAmount = 0f;
 		carryType = CarryType.None;
-		findingFood = false;
+		isStarving = false;
+		lifeSpan = Random.Range(minLifespan, maxLifespan);
+		timeAlive = 0f;
+		assignedLocation = null;
+		inNest = false;
+	}
+
+	/// <summary>
+	/// This function starts the ant processes. This should
+	/// be called when reusing the ant from a ant object pool.
+	/// <remarks>This function can only be called after the ant object has
+	/// passed its awake() call.</remarks>
+	/// </summary>
+	public virtual void Birth()
+	{
+		enabled = true;
+
+		// Reset state
+		ResetState();
+
+		// Ant starts in the nest
+		inNest = true;
+		assignedLocation = NetworkManager.instance.nest;
+		Hide();
+		
+		// Start the ant update
+		StartCoroutine(AntUpdate());
 	}
 
 	// Use this for initialization
-	protected virtual void Start () 
+	protected virtual void Awake () 
 	{
 	
 		// If init was not called for this object yet, call it
@@ -158,13 +216,6 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 		//Get a component references
 		rb2D = GetComponent <Rigidbody2D> ();
 		spriteRender = GetComponent <SpriteRenderer> ();
-
-		// Ant starts in the nest
-		inNest = true;
-		Hide();
-
-		// Start the ant update
-		StartCoroutine(AntUpdate());
 	}
 	
 	// Update is called once per frame
@@ -182,24 +233,34 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	{
 		for(;;)
 		{
+			// Check lifespan
+			timeAlive += SecForAntUpdate;
+			if(timeAlive >= lifeSpan)
+			{
+				this.Die();
+			}
+
 			// Determine food take location
 			float energyDeficiet = 0f;
 			if(inNest) {
 				energyDeficiet = EnergyUsedPerAntUpdate - NetworkManager.instance.nest.TakeFood(EnergyUsedPerAntUpdate);
 			}
 
+			// When starving, the ant's lifetime is shortened for every second it starves
 			if(foodEnergy > 0)
 			{
 				foodEnergy -= energyDeficiet;
 			}
-			else if(findingFood)
+			else if(isStarving)
 			{
+				lifeSpan -= SecForAntUpdate;
 				foodEnergy = 0;
 			}
 			else
 			{
+				lifeSpan -= SecForAntUpdate;
 				foodEnergy = 0;
-				findingFood = true;
+				isStarving = true;
 			}
 
 			yield return new WaitForSeconds(SecForAntUpdate);
@@ -220,6 +281,18 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	public void Unhide()
 	{
 		spriteRender.enabled = true;
+	}
+
+	/// <summary>
+	/// This function causes this ant gameobject to die, stopping
+	/// all coroutines and removing it from locations.
+	/// </summary>
+	public void Die()
+	{
+		StopAllCoroutines();
+		NetworkManager.instance.nest.HandleAntDeath(this);
+		Hide();
+		enabled = false;
 	}
 
 	/// <summary>
@@ -277,7 +350,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 			foodEnergy = foodEnergy + amount;
 		}
 
-		findingFood = false;
+		isStarving = false;
 		
 		return eatAmount;
 	}

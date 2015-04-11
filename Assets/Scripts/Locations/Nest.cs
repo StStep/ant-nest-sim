@@ -7,9 +7,16 @@ using System.Collections.Generic;
 /// </summary>
 public class Nest : Location {
 
-	protected const int _startingWorkerAnts = 100;
+	public const int startingWorkerAnts = 20;
+
+	public const int startWorkAntPool = 100;
 
 	protected float foodStorage;
+
+	/// <summary>
+	/// This is a pool of worker ant objects
+	/// </summary>
+	protected Queue<WorkerAnt> workerAntPool;
 
 	/// <summary>
 	/// This initializes this instance, for intializaing internal objects 
@@ -20,9 +27,17 @@ public class Nest : Location {
 		base.Init();
 
 		foodStorage = 1000f;
+		workerAntPool = new Queue<WorkerAnt>();
 
-		// Create the initial workers
-		CreateWorkerAnts(_startingWorkerAnts);
+		// Add starting ants to pool
+		WorkerAnt tempAnt;
+		for(int i = 0; i < startWorkAntPool; i++)
+		{
+			tempAnt = PrefabManager.instance.CreateWorkerAntObject(transform.position);
+			workerAntPool.Enqueue(tempAnt);
+			tempAnt.transform.parent = transform;
+		}
+
 		upperText.text = WorkerAntCount + " Workers";
 		lowerText.text = ((int)foodStorage) + " Food Stored";
 	}
@@ -30,6 +45,14 @@ public class Nest : Location {
 	protected override void Awake()
 	{
 		base.Awake();
+	}
+
+	protected override void Start ()
+	{
+		base.Start ();
+
+		// Birth the initial workers
+		BirthWorkerAnts(startingWorkerAnts);
 	}
 
 	/// <summary>
@@ -75,15 +98,20 @@ public class Nest : Location {
 		}
 
 		// Move ants to return queue
-		int checkAmount = 0;
-		for(int i = 0; i < takeAmount && checkAmount < WorkerAntCount; i++)
+		int startingCount = WorkerAntCount;
+		int foundAmount = 0;
+		for(int i = 0; i < startingCount; i++)
 		{
 			// Only take idle workers
-			if(workerAntQ.Peek().IsIdle)
+			if(workerAntList[WorkerAntCount - 1].IsIdle)
 			{
-				retList.Add(workerAntQ.Dequeue());
+				retList.Add(workerAntList[WorkerAntCount - 1]);
+				workerAntList.RemoveAt(WorkerAntCount - 1);
+				if(++foundAmount == takeAmount)
+				{
+					break;
+				}
 			}
-			checkAmount++;
 		}
 
 		// Update worker count
@@ -129,8 +157,8 @@ public class Nest : Location {
 		// Sort by morphology
 		if(antAdding is WorkerAnt)
 		{
-			// Add to q
-			workerAntQ.Enqueue((WorkerAnt)antAdding);
+			// Add to list
+			workerAntList.Insert(0, (WorkerAnt)antAdding);
 
 			// Update worker count
 			upperText.text = WorkerAntCount + " Workers";
@@ -142,10 +170,12 @@ public class Nest : Location {
 	}
 
 	/// <summary>
-	/// This function creates the given number of worker ants and adds them to the nest.
+	/// This function births a given number of worker ants. If ants exist
+	/// in the ant pool, it prioritizes taking those. Otherwise, it creates new
+	/// ant objects
 	/// </summary>
-	/// <param name="amount">The desired amount of worker ants to create.</param>
-	public void CreateWorkerAnts(int amount)
+	/// <param name="amount">The desired amount of worker ants to birth.</param>
+	public void BirthWorkerAnts(int amount)
 	{
 		if(amount < 0)
 		{
@@ -155,10 +185,40 @@ public class Nest : Location {
 		WorkerAnt tempAnt;
 		for(int i = 0; i < amount; i++)
 		{
-			tempAnt = PrefabManager.instance.CreateWorkerAntObject(transform.position);
-			workerAntQ.Enqueue(tempAnt);
-			tempAnt.transform.parent = transform;
+			if(workerAntPool.Count != 0)
+			{
+				tempAnt = workerAntPool.Dequeue();
+			}
+			else
+			{
+				tempAnt = PrefabManager.instance.CreateWorkerAntObject(transform.position);
+				tempAnt.transform.parent = transform;
+			}
+
+			tempAnt.Birth();
+			workerAntList.Insert(0, tempAnt);
 		}
+
+		upperText.text = WorkerAntCount + " Workers";
+	}
+
+	/// <summary>
+	/// This function handles the death of an ant. It pulls the ant from the location it's
+	/// at and adds it back to the pool.
+	/// </summary>
+	/// <param name="deadAnt">The newly dead ant.</param>
+	public void HandleAntDeath(Ant deadAnt)
+	{
+		deadAnt.assignedLocation.RemoveAnt(deadAnt);
+		if(deadAnt is WorkerAnt)
+		{
+			workerAntPool.Enqueue((WorkerAnt)deadAnt);
+		}
+		else
+		{
+			Debug.Log("HandleAntDeath: ERROR - Unknwin ant class");
+		}
+		deadAnt.transform.position = transform.position;
 	}
 
 	/// <summary>

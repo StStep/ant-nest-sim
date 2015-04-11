@@ -61,7 +61,8 @@ public abstract class AssignableLocation : Location {
 				foreach(WorkerAnt ant in takenAnts)
 				{
 					ant.assigned = true;
-					workerAntQ.Enqueue(ant);
+					ant.assignedLocation = this;
+					workerAntList.Insert(0, ant);
 					
 					ant.OrderToStream(orderName, pathToThis, pathToNest);
 				}
@@ -112,7 +113,9 @@ public abstract class AssignableLocation : Location {
 		WorkerAnt ant;
 		for(int i = 0; i < unassignAmount; i++)
 		{
-			ant = workerAntQ.Dequeue();
+			ant = workerAntList[WorkerAntCount - 1];
+			workerAntList.RemoveAt(WorkerAntCount - 1);
+			ant.assignedLocation = NetworkManager.instance.nest;
 			ant.assigned = false;
 		}
 		
