@@ -10,80 +10,24 @@ public enum CarryType { None, Food};
 /// </summary>
 public class Ant : MonoBehaviour , IEquatable<Ant>
 {
-	/// <summary>
-	/// The time for an ant to move 1 unit
-	/// </summary>
-	public const float moveTime = .5f;
-
-	/// <summary>
-	/// The amount of energy the ant the ant uses a second
-	/// </summary>
-	public const float energyUsageSec = .25f;
-
-	/// <summary>
-	/// The carry capacity of the ant.
-	/// </summary>
+	public const float timeToMoveOneUnit = .5f;
 	public const float carryCapacity = 10f;
-
-	/// <summary>
-	/// The carry capacity of the ant.
-	/// </summary>
 	public const float foodEnegryCapacity = 1f;
-
-	/// <summary>
-	/// The minimum lifespan of an ant in seconds
-	/// </summary>
 	public const float minLifespan = 20f;
-
-	/// <summary>
-	/// The maximum lifespan of an ant in seconds
-	/// </summary>
 	public const float maxLifespan = 40f;
+    public const float secPerAntUpdate = .5f;
+    public const float energyUsageSec = .25f;
+    protected const float EnergyUsedPerAntUpdate = energyUsageSec*secPerAntUpdate;
 
 	/// <summary>
 	/// The type stuff the ant is carrying.
 	/// </summary>
-	public CarryType carryType;
-
-	/// <summary>
-	/// The time in seconds between ant updates
-	/// </summary>
-	public const float SecForAntUpdate = .5f;
-
-	/// <summary>
-	/// The energy usage per ant update.
-	/// </summary>
-	protected const float EnergyUsedPerAntUpdate = energyUsageSec*SecForAntUpdate;
+	public CarryType carryType;		
 
 	/// <summary>
 	/// The location that this ant is assigned to
 	/// </summary>
 	public Location assignedLocation;
-
-	/// <summary>
-	/// The current amount being carried by the ant.
-	/// </summary>
-	protected float carryAmount;
-
-	/// <summary>
-	/// The amount of energy due to food the ant has
-	/// </summary>
-	protected float foodEnergy;
-
-	/// <summary>
-	/// The inverse move time, pre-calculated for efficiency
-	/// </summary>
-	protected float inverseMoveTime;
-
-	/// <summary>
-	/// The current order the ant is following.
-	/// </summary>
-	protected string currentOrder;
-
-	/// <summary>
-	/// If the ant is trying to find food
-	/// </summary>
-	protected bool isStarving;
 
 	/// <summary>
 	/// Gets a value that is false if the ant is under an order, true if it
@@ -135,6 +79,31 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 		}
 	}
 
+    /// <summary>
+    /// The current amount being carried by the ant.
+    /// </summary>
+    protected float carryAmount;
+    
+    /// <summary>
+    /// The amount of energy due to food the ant has
+    /// </summary>
+    protected float foodEnergy;
+    
+    /// <summary>
+    /// The inverse move time, pre-calculated for efficiency
+    /// </summary>
+    protected float inverseMoveTime;
+    
+    /// <summary>
+    /// The current order the ant is following.
+    /// </summary>
+    protected string currentOrder;
+    
+    /// <summary>
+    /// If the ant is trying to find food
+    /// </summary>
+    protected bool isStarving;
+
 	/// <summary>
 	/// The sprite renderer.
 	/// </summary>
@@ -162,7 +131,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	public virtual void Init()
 	{
 		_antID = GameManager.GetNextAntID();
-		inverseMoveTime = 1f / moveTime;
+		inverseMoveTime = 1f / timeToMoveOneUnit;
 		enabled = false;
 		ResetState();
 	}
@@ -234,7 +203,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 		for(;;)
 		{
 			// Check lifespan
-			timeAlive += SecForAntUpdate;
+			timeAlive += secPerAntUpdate;
 			if(timeAlive >= lifeSpan)
 			{
 				this.Die();
@@ -253,17 +222,17 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 			}
 			else if(isStarving)
 			{
-				lifeSpan -= SecForAntUpdate;
+				lifeSpan -= secPerAntUpdate;
 				foodEnergy = 0;
 			}
 			else
 			{
-				lifeSpan -= SecForAntUpdate;
+				lifeSpan -= secPerAntUpdate;
 				foodEnergy = 0;
 				isStarving = true;
 			}
 
-			yield return new WaitForSeconds(SecForAntUpdate);
+			yield return new WaitForSeconds(secPerAntUpdate);
 		}
 	}
 

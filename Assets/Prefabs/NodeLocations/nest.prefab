@@ -181,6 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upperText: {fileID: 11421070}
   lowerText: {fileID: 11492374}
+  antBirthPerSec: 2
 --- !u!114 &11467118
 MonoBehaviour:
   m_ObjectHideFlags: 1

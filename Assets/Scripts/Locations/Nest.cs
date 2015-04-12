@@ -8,13 +8,26 @@ using System.Collections.Generic;
 public class Nest : Location {
 
 	public const int startingWorkerAnts = 20;
-
 	public const int startWorkAntPool = 100;
+    public const float secOfFoodToReserve = 5f;
+	public const float secPerNestUpdate = .5f;
+	public const float baseFoodUsePerSec = 1f;
+    public const float baseFoodPerUpdate = baseFoodUsePerSec*secPerNestUpdate;
+    public const float foodPerAntBirth = .25f;
+    public const float foodReserveLevel = secOfFoodToReserve * baseFoodUsePerSec;
 
+    /// <summary>
+    /// The amount of ants born a second
+    /// </summary>
+    public float antBirthPerSec;
+
+	/// <summary>
+	/// The current food, edible by ants, in the nest
+	/// </summary>
 	protected float foodStorage;
 
 	/// <summary>
-	/// This is a pool of worker ant objects
+	/// This is a pool of worker ant objects to pull from when birthing ants
 	/// </summary>
 	protected Queue<WorkerAnt> workerAntPool;
 
@@ -53,6 +66,59 @@ public class Nest : Location {
 
 		// Birth the initial workers
 		BirthWorkerAnts(startingWorkerAnts);
+
+		// Start the Nest update
+		StartCoroutine(NestUpdate());
+	}
+
+	/// <summary>
+	/// This coroutine checks is used to manage the nest state. Ants are only
+    /// birthed if the food storage is greater than the reserve. If the base food rate
+    /// can't be taken from food storage, and queen dies, and this function exits.
+	/// </summary>
+	/// <returns>Returns IEnumerator, intended to be used as a coroutine.</returns>
+	protected IEnumerator NestUpdate()
+	{
+        float antBirthLeftover = 0f;
+        int antBirthThisUpdate;
+
+        float local_antBirthPerSec = antBirthPerSec;
+        float antBirthPerUpdate = local_antBirthPerSec*secPerNestUpdate;
+        float foodFromBirthThisUpdate = antBirthPerUpdate*foodPerAntBirth;
+
+		for(;;)
+		{
+            // Update calculations when antBirthPerSec changes
+            if(local_antBirthPerSec != antBirthPerSec)
+            {
+                local_antBirthPerSec = antBirthPerSec;
+                antBirthPerUpdate = local_antBirthPerSec*secPerNestUpdate;
+                foodFromBirthThisUpdate = antBirthPerUpdate*foodPerAntBirth;
+            }
+
+            antBirthThisUpdate = Mathf.FloorToInt(antBirthPerUpdate + antBirthLeftover);
+            antBirthLeftover = (antBirthPerUpdate + antBirthLeftover) - (float) antBirthThisUpdate;
+
+			if(foodStorage > (foodReserveLevel + foodFromBirthThisUpdate))
+			{
+                foodStorage -= foodFromBirthThisUpdate;
+                BirthWorkerAnts(antBirthThisUpdate);
+
+			}
+            else if(foodStorage >= baseFoodPerUpdate)
+            {
+                foodStorage -= baseFoodPerUpdate;
+            }
+            else
+            {
+                Debug.Log("The Queen Has Starved!");
+                yield break;
+            }
+
+            lowerText.text = ((int)foodStorage) + " Food Stored";
+
+			yield return new WaitForSeconds(secPerNestUpdate);
+		}
 	}
 
 	/// <summary>
@@ -120,13 +186,14 @@ public class Nest : Location {
 	}
 
 	/// <summary>
-	/// Takes food from the food storage.
+	/// Takes food from the food storage. Zero food is returned if the
+	/// nest food storage is below reserve levels.
 	/// </summary>
 	/// <returns>The amount of food taken</returns>
 	/// <param name="amount">The amount of food attempted to take.</param>
 	public float TakeFood(float amount)
 	{
-		if(amount < 0f)
+		if(amount < 0f || foodStorage <= foodReserveLevel)
 		{
 			return 0f;
 		}
@@ -216,7 +283,7 @@ public class Nest : Location {
 		}
 		else
 		{
-			Debug.Log("HandleAntDeath: ERROR - Unknwin ant class");
+			Debug.Log("HandleAntDeath: ERROR - Unknown ant class");
 		}
 		deadAnt.transform.position = transform.position;
 	}
