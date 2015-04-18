@@ -11,7 +11,7 @@ GameObject:
   - 212: {fileID: 21215598}
   - 114: {fileID: 11474830}
   m_Layer: 0
-  m_Name: path
+  m_Name: straightPath
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
