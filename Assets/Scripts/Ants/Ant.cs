@@ -10,6 +10,9 @@ public enum CarryType { None, Food};
 /// </summary>
 public class Ant : MonoBehaviour , IEquatable<Ant>
 {
+
+    // TODO Ant functions should be called top down from Assignments
+
 	public const float timeToMoveOneUnit = .5f;
 	public const float carryCapacity = 10f;
 	public const float foodEnegryCapacity = 1f;
@@ -22,12 +25,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	/// <summary>
 	/// The type stuff the ant is carrying.
 	/// </summary>
-	public CarryType carryType;		
-
-	/// <summary>
-	/// The location that this ant is assigned to
-	/// </summary>
-	public Location assignedLocation;
+	public CarryType carryType;
 
 	/// <summary>
 	/// Gets a value that is false if the ant is under an order, true if it
@@ -38,7 +36,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	{
 		get
 		{
-			return String.IsNullOrEmpty(currentOrder);
+			return (!assigned && inNest);
 		}
 	}
 
@@ -51,7 +49,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	/// This variable is true if the ant is currently assigned to a location. If false
 	/// the ant is either making it's way back to the nest, or in the nest.
 	/// </summary>
-	[HideInInspector]public bool assigned;
+	private bool assigned;
 
 	/// The ant ID, unique for each <see cref="Ant"/> object
 	protected int _antID;
@@ -138,7 +136,6 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 
 	protected void ResetState()
 	{
-		currentOrder = "";
 		assigned = false;
 		foodEnergy = foodEnegryCapacity;
 		carryAmount = 0f;
@@ -146,8 +143,17 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 		isStarving = false;
 		lifeSpan = Random.Range(minLifespan, maxLifespan);
 		timeAlive = 0f;
-		assignedLocation = null;
 		inNest = false;
+	}
+
+	public virtual void Assign()
+	{
+		assigned = true;
+	}
+
+	public virtual void Unassign()
+	{
+		assigned = false;
 	}
 
 	/// <summary>
@@ -165,11 +171,8 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 
 		// Ant starts in the nest
 		inNest = true;
-		assignedLocation = NetworkManager.instance.nest;
 		Hide();
 		
-		// Start the ant update
-		StartCoroutine(AntUpdate());
 	}
 
 	// Use this for initialization
@@ -194,49 +197,6 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	}
 
 	/// <summary>
-	/// This coroutine is used for updating the state of the ant. It happends less often
-	/// then Update, and is for a coarser update schedule for ant specific states.
-	/// </summary>
-	/// <returns>Returns IEnumerator, intended to be used as a coroutine.</returns>
-	protected virtual IEnumerator AntUpdate()
-	{
-		for(;;)
-		{
-			// Check lifespan
-			timeAlive += secPerAntUpdate;
-			if(timeAlive >= lifeSpan)
-			{
-				this.Die();
-			}
-
-			// Determine food take location
-			float energyDeficiet = 0f;
-			if(inNest) {
-				energyDeficiet = EnergyUsedPerAntUpdate - NetworkManager.instance.nest.TakeFood(EnergyUsedPerAntUpdate);
-			}
-
-			// When starving, the ant's lifetime is shortened for every second it starves
-			if(foodEnergy > 0)
-			{
-				foodEnergy -= energyDeficiet;
-			}
-			else if(isStarving)
-			{
-				lifeSpan -= secPerAntUpdate;
-				foodEnergy = 0;
-			}
-			else
-			{
-				lifeSpan -= secPerAntUpdate;
-				foodEnergy = 0;
-				isStarving = true;
-			}
-
-			yield return new WaitForSeconds(secPerAntUpdate);
-		}
-	}
-
-	/// <summary>
 	/// This function causes the ant to be visible in the game space.
 	/// </summary>
 	public void Hide()
@@ -258,10 +218,6 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	/// </summary>
 	public void Die()
 	{
-		StopAllCoroutines();
-		NetworkManager.instance.nest.HandleAntDeath(this);
-		Hide();
-		enabled = false;
 	}
 
 	/// <summary>
@@ -335,56 +291,6 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 		carryType = CarryType.None;
 		return amount;
 	}
-
-	#region Coroutine Actions
-
-	/// <summary>
-	/// The action coroutine that moves the gameobject to a vector
-	/// </summary>
-	/// <returns>Returns IEnumerator, intended to be used as a coroutine.</returns>
-	/// <param name="targetPosition">The position to move the gameobject to.</param>
-	protected IEnumerator ActMoveToPosition(Vector2 targetPosition)
-	{
-		Vector2 diff;
-		diff.x = targetPosition.x - transform.GetPositionX();
-		diff.y = targetPosition.y - transform.GetPositionY();
-		float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
-		if(angle < 0) angle += 360;
-
-		// TODO Make this look nice, splines perhaps?
-		//print ("Starting to rotate");
-		/*		while (Mathf.Abs(transform.GetAngleZ() - targetAngle) > .1f)
-		{
-			float angle = Mathf.MoveTowardsAngle(transform.GetAngleZ(), targetAngle, rotateSpeed * Time.deltaTime);
-			transform.SetAngleZ(angle);
-			yield return 0;
-		}*/
-		
-		transform.SetAngleZ(angle);
-
-		//Calculate the remaining distance to move based on the square magnitude of the difference between current position and end parameter. 
-		//Square magnitude is used instead of magnitude because it's computationally cheaper.
-		Vector3 end = targetPosition.ToVec3(transform.GetPositionZ());
-		float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
-		
-		//While that distance is greater than a very small amount (Epsilon, almost zero):
-		while(sqrRemainingDistance > float.Epsilon)
-		{
-			//Find a new position proportionally closer to the end, based on the moveTime
-			Vector3 newPostion = Vector3.MoveTowards(rb2D.position, end, inverseMoveTime * Time.deltaTime);
-			
-			//Call MovePosition on attached Rigidbody2D and move it to the calculated position.
-			rb2D.MovePosition (newPostion);
-			
-			//Recalculate the remaining distance after moving.
-			sqrRemainingDistance = (transform.position - end).sqrMagnitude;
-			
-			//Return and loop until sqrRemainingDistance is close enough to zero to end the function
-			yield return null;
-		}
-	}
-
-	#endregion
 
 	/// <summary>
 	/// Determines whether the specified <see cref="Ant"/> is equal to the current <see cref="Ant"/>.

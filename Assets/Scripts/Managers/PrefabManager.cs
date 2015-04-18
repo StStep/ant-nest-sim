@@ -17,6 +17,8 @@ public class PrefabManager : MonoBehaviour {
 	public RottenApple applePrefab;
     public StraightPath straightPathPrefab;
 	public WorkerAnt workerAntPrefab;
+    public NestAssignment nestAssignmentPrefab;
+    public StreamAssignment streamAssignmentPrefab;
 
 	void Awake()
 	{
@@ -82,5 +84,19 @@ public class PrefabManager : MonoBehaviour {
 		newWorker.Init();
 		return newWorker;
 	}
+
+    public NestAssignment CreateNestAssignment()
+    {
+        NestAssignment nestAssignment = Instantiate(nestAssignmentPrefab,  Vector3.zero, Quaternion.identity) as NestAssignment;
+        nestAssignment.Init();
+        return nestAssignment;
+    }
+
+    public StreamAssignment CreateStreamAssignment()
+    {
+        StreamAssignment streamAssignment = Instantiate(streamAssignmentPrefab,  Vector3.zero, Quaternion.identity) as StreamAssignment;
+        streamAssignment.Init();
+        return streamAssignment;
+    }
 
 }

@@ -20,18 +20,6 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
     public Text lowerText;
 
     /// <summary>
-    /// Gets the amount worker ants assigned to this location
-    /// </summary>
-    /// <value>The count of the worker ant queue.</value>
-    public int WorkerAntCount
-    {
-        get
-        {
-            return workerAntList.Count;
-        }
-    }
-
-    /// <summary>
     ///  The game position of the node.
     /// </summary>
     /// <value>The position.</value>
@@ -52,12 +40,6 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
     /// The most recent click type on the gameobject
     /// </summary>
     protected ClickType clickStatus;
-    
-    /// <summary>
-    /// This is a list of worker ants assigned to this location. Ants are inserted
-    /// at the beggening and removed from the end.
-    /// </summary>
-    protected List<WorkerAnt> workerAntList;
 
 	/// The location ID, unique for each <see cref="Node"/> object
 	protected int _locID;
@@ -86,19 +68,19 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
     public virtual void Init()
     {
         clickStatus = ClickType.NoClick;
-        workerAntList = new List<WorkerAnt>();
 
         _connectedLocations = new List<Location>();
         _connectedPaths = new Dictionary<int, Path>();
         _locID = NetworkManager.GetNextLocID();
         
-        upperText.text = WorkerAntCount + " Workers";
+        upperText.text = "";
+        lowerText.text = "";
     }
     
     protected virtual void Awake()
     {
         // If init was not called for this object yet, call it
-        if(workerAntList == null)
+        if(_locID == 0)
         {
             Init();
         }
@@ -239,48 +221,6 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
         else if (clickStatus == ClickType.RightClick)
         {
             Debug.Log("You right clicked on a location");
-        }
-    }
-    
-    /// <summary>
-    /// This couroutine function allows an ant to visit a location. A visit consists of a
-    /// consecutive enter cooroutine and exit cooroutine.
-    /// </summary>
-    /// <param name="visitingAnt">The ant that is visiting the location</param>
-    public IEnumerator Visit(Ant visitingAnt)
-    {
-        yield return StartCoroutine(this.Enter(visitingAnt));
-        yield return StartCoroutine(this.Exit(visitingAnt));
-    }
-
-    /// <summary>
-    /// This couroutine function allows an ant to enter a location. This couroutine should be called 
-    /// by the ant when the ant wants to enter a node.
-    /// </summary>
-    /// <param name="enteringAnt">The ant that is entering the location</param>
-    public abstract IEnumerator Enter(Ant enteringAnt);
-    
-    /// <summary>
-    /// This couroutine function allows an ant to exit a location. This couroutine should be called 
-    /// by the ant when the ant wants to leave a node.
-    /// </summary>
-    /// <param name="exitingAnt">The ant that is exiting the location</param>
-    public abstract IEnumerator Exit(Ant exitingAnt);
-    
-    /// <summary>
-    /// This function removes a specific ant from a location list.
-    /// </summary>
-    /// <param name="antToRemove">The ant to remove.</param>
-    public void RemoveAnt(Ant antToRemove)
-    {
-        if(antToRemove is WorkerAnt)
-        {
-            workerAntList.Remove((WorkerAnt)antToRemove);
-            upperText.text = WorkerAntCount + " Workers";
-        }
-        else
-        {
-            Debug.Log("RemoveAnt: ERROR - Unknwin ant class");
         }
     }
 }

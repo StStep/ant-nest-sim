@@ -34,7 +34,7 @@ public class NetworkManager : MonoBehaviour {
 	/// <summary>
 	/// The Nest, the primary location of the network.
 	/// </summary>
-	[HideInInspector]public Nest nest;
+	[HideInInspector]private Nest nest;
 
 	//TODO this a temp creation method 
 	public Vector2[] appleVecList;
@@ -56,6 +56,11 @@ public class NetworkManager : MonoBehaviour {
 
 		CreateNetwork();
 	}
+
+    void Start() 
+    {
+        GameManager.instance.nestAssignment.LocationConnect(nest);
+    }
 
 	/// <summary>
 	/// This function initializes and forms the location network.
