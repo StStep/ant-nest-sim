@@ -2,116 +2,110 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// This class stores a network of nodes and allows for searching the network for paths
+/// This class stores a network of locations and allows for searching the network for routes.
 /// </summary>
 /// <para>
-/// This class can save a network of objects of the <see cref="Node"/> class, and can 
-/// search through the network, finding and returning a <see cref="Path"/> using A* search method.
-/// After the network is created nodes are added with calls to ConnectNodes() which handles 
-/// the inter-node connections necessary for traversing the network. The function GetPath() returns a Path
-/// object if a path can be found between the two provided nodes.
+/// This class can save a network of objects of the <see cref="Location"/> class, and can 
+/// search through the network, finding and returning a <see cref="Route"/> using A* search method.
+/// After the network is created locations are added with calls to ConnectLocations() which handles 
+/// the inter-node connections necessary for traversing the network. The function GetRoute() returns a Route
+/// object if a route can be found between the two provided locations.
 /// </para>
 /// <remarks>
-/// Any paths provided by this class become invalid if the network changes.
-/// Therefore, any network changes should be handled carefully, with new path requests
+/// Any routes provided by this class become invalid if the network changes.
+/// Therefore, any network changes should be handled carefully, with new route requests
 /// being frequent.
 /// </remarks>
 public class Network {
 	  
-	// TODO Store a cache of past path searches, clearing the path list when the network changes
+	// TODO Store a cache of past route searches, clearing the route list when the network changes
 	// As a way of avoiding doing A* searches for the same destination/start or the compliment
 
-	/// A dictionary of nodes in the network, using the location ID of the nodes 
-	protected Dictionary<int, Node> _netNodes;
+	/// A dictionary of locaitons in the network, using the location ID of the nodes 
+	protected Dictionary<int, Location> _netLocs;
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="Network"/> class around a primary <see cref="Node"/>.
+	/// Initializes a new instance of the <see cref="Network"/>.
 	/// </summary>
-	/// <param name="primaryNode">The node to center the network around.</param>
 	public Network() {
-		_netNodes = new Dictionary<int, Node>();
+		_netLocs = new Dictionary<int, Location>();
 	}
 
-	// This function connects all of the child nodes 
-	// to the parent node
 	/// <summary>
-	/// This function first adds the nodes to the nework, and then connects the children nodes to the parent.
+	/// This function first adds the locations together and connects them with the given path.
 	/// </summary>
-	/// <param name="parentNode">The parent node, to which each child is connected.</param>
-	/// <param name="childrenNodes">The children node to connect to the parent node.</param>
-	public void ConnectNodes(Node parentNode, params Node[] childrenNodes)
+    /// <param name="locationA">Location A of the added path.</param>
+    /// <param name="locationB">Location B of the added path.</param>
+    /// <param name="pathBetween">The path to use to connect the two given locations.</param>
+    public void ConnectLocations(Location locationA, Location locationB, Path pathBetween)
 	{
-		_netNodes[parentNode.LocID] = parentNode;
+		_netLocs[locationA.LocID] = locationA;
+		_netLocs[locationB.LocID] = locationB;
 
-		foreach(Node child in childrenNodes)
-		{
-			_netNodes[child.LocID] = child;
-			parentNode.AddConnection(child);
-			child.AddConnection(parentNode);
-		}
+        pathBetween.ConnectLocations(locationA, locationB);
 	}
 
 	/// <summary>
 	/// Calculates the distance squared.
 	/// </summary>
-	/// <returns>The square distance between parameter nodes.</returns>
-	/// <param name="node1">First node used in distance calculation.</param>
-	/// <param name="node2">Second node used in distance calculation.</param>
+    /// <returns>The square distance between the parameter location.</returns>
+    /// <param name="locationA">First location used in distance calculation.</param>
+    /// <param name="locationB">Second location used in distance calculation.</param>
 	/// <para>
-	/// This function returns the square distance between two nodes. This is intended
+    /// This function returns the square distance between two locations. This is intended
 	/// for distance comparison, where the exact absolute distance is not important. 
 	/// </para>
-	private static float calculateDistance(Node node1, Node node2)
+	private static float calculateDistance(Location locationA, Location locationB)
 	{
-		return 	((node1.Position.x - node2.Position.x) * (node1.Position.x - node2.Position.x) ) + 
-				((node1.Position.y - node2.Position.y) * (node1.Position.y - node2.Position.y) );
+		return 	((locationA.Position.x - locationB.Position.x) * (locationA.Position.x - locationB.Position.x) ) + 
+				((locationA.Position.y - locationB.Position.y) * (locationA.Position.y - locationB.Position.y) );
 	}
 
 	/// <summary>
-	/// This function returns an object of the class <see cref="Path"/> if 
-	/// a path exists bewteen the provided nodes. Otherwise, NULL is returned.
+    /// This function returns an object of the class <see cref="Route"/> if 
+	/// a route exists bewteen the provided locations. Otherwise, NULL is returned.
 	/// </summary>
-	/// <returns>A <see cref="Path"/> object describing the shortest path from the start to end node</returns>
-	/// <param name="startNode">The start node in the desired path.</param>
-	/// <param name="endNode">The destination node of the desired path.</param>
+    /// <returns>A <see cref="Route"/> An object describing the shortest path from the start to end location</returns>
+    /// <param name="startLoc">The start location in the desired route.</param>
+    /// <param name="endLoc">The destination location of the desired route.</param>
 	/// <para>
-	/// This function uses and A* search to find the shortest path between two nodes
+    /// This function uses and A* search to find the shortest route between the two given locations
 	/// on the network.
 	/// </para>
-	public Path GetPath(Node startNode, Node endNode)
+	public Route GetRoute(Location startLoc, Location endLoc)
 	{
-		if(startNode == null || endNode == null)
+		if(startLoc == null || endLoc == null)
 		{
 			return null;
 		}
 
-		// Already at node
-		Path retPath;
-		if(startNode.LocID == endNode.LocID)
+		// Already at the location
+		Route retRoute;
+		if(startLoc.LocID == endLoc.LocID)
 		{
-			retPath = new Path();
-			return retPath;
+			retRoute = new Route();
+			return retRoute;
 		}
 
-		Node start;
-		Node goal;
+		Location start;
+		Location goal;
 
-		_netNodes.TryGetValue(startNode.LocID, out start);//_netNodes[startNode.LocID];
-		_netNodes.TryGetValue(endNode.LocID, out goal);//_netNodes[endNode.LocID];
+		_netLocs.TryGetValue(startLoc.LocID, out start);
+		_netLocs.TryGetValue(endLoc.LocID, out goal);
 		if(start == null || goal == null)
 		{
 			return null;
 		}
 
 		// Make Lists for search
-		List<NodeWrap> openList = new List<NodeWrap>();
-		List<NodeWrap> closedList = new List<NodeWrap>();
+		List<SearchNode> openList = new List<SearchNode>();
+		List<SearchNode> closedList = new List<SearchNode>();
 
 		// Place starting node in open list list
-		openList.Add(new NodeWrap(start, null, 0, calculateDistance(start, goal)));
+		openList.Add(new SearchNode(start, null, 0, calculateDistance(start, goal)));
 
-		NodeWrap curNodeWrap;
-		NodeWrap goalNodeWrap = null;
+		SearchNode curSearchNode;
+		SearchNode goalSearchNode = null;
 
 		while(true)
 		{
@@ -125,27 +119,27 @@ public class Network {
 			openList.Sort();
 
 			// Take lowest F in openList and move to closedList
-			curNodeWrap = openList[0];
+			curSearchNode = openList[0];
 			openList.RemoveAt(0);
-			closedList.Add(curNodeWrap);
+			closedList.Add(curSearchNode);
 
 			// Check for goal node
-			if(curNodeWrap.Equals(goal))
+			if(curSearchNode.Equals(goal))
 			{
-				goalNodeWrap = curNodeWrap;
+				goalSearchNode = curSearchNode;
 				break;
 			}
 
 
 			// Add connected nodes to open list if not already listed in closedList, update if on openList
-			foreach(Node node in curNodeWrap.node)
+			foreach(Location location in curSearchNode.location)
 			{
 				bool found = false;
 
 				// Ignore node if on closed list
-				foreach(NodeWrap nodeWrap in closedList)
+				foreach(SearchNode searchNode in closedList)
 				{
-					if(nodeWrap.Equals(node))
+					if(searchNode.Equals(location))
 					{
 						found = true;
 						break;
@@ -157,17 +151,17 @@ public class Network {
 					continue;
 				}
 
-				// Potentially update NodeWrap if it is on the openList and the costToNode is less
-				foreach(NodeWrap nodeWrap in openList)
+                // Potentially update SearchNode if it is on the openList and the costToNode is less
+				foreach(SearchNode searchNode in openList)
 				{
-					if(nodeWrap.Equals(node))
+					if(searchNode.Equals(location))
 					{
 						// Compare costToNode, update parent if node has lower cost
-						float newCostToNode = curNodeWrap.costToNode + calculateDistance(curNodeWrap.node, node);
-						if(newCostToNode < nodeWrap.costToNode)
+						float newCostToNode = curSearchNode.costToNode + calculateDistance(curSearchNode.location, location);
+						if(newCostToNode < searchNode.costToNode)
 						{
-							nodeWrap.parentNodeWrap = curNodeWrap;
-							nodeWrap.costToNode = newCostToNode;
+							searchNode.parentSearchNode = curSearchNode;
+							searchNode.costToNode = newCostToNode;
 						}
 
 						found = true;
@@ -180,29 +174,29 @@ public class Network {
 					continue;
 				}
 
-				openList.Add(new NodeWrap(node, curNodeWrap, curNodeWrap.costToNode + calculateDistance(curNodeWrap.node, node), calculateDistance(node, goal)));
+				openList.Add(new SearchNode(location, curSearchNode, curSearchNode.costToNode + calculateDistance(curSearchNode.location, location), calculateDistance(location, goal)));
 			}
 		}
 
-		if(goalNodeWrap == null)
+		if(goalSearchNode == null)
 		{
 			return null;
 		}
 
-		// Make a path if the final NodeWrap, a path from start to goal, was found
-		retPath = new Path();
-		NodeWrap parent = goalNodeWrap;
+        // Make a route if the final NodeWrap, a route from start to goal, was found
+		retRoute = new Route();
+		SearchNode parent = goalSearchNode;
 
-		// Create path from goal to start
+		// Create route from goal to start
 		while(parent != null)
 		{
-			retPath.AddNode(parent.node);
-			parent = parent.parentNodeWrap;
+			retRoute.AddLocation(parent.location);
+			parent = parent.parentSearchNode;
 		}
 
-		// Reverse path becuase it was created from goal to start
-		retPath.Reverse();
+        // Reverse route becuase it was created from goal to start
+		retRoute.Reverse();
 
-		return retPath;
+		return retRoute;
 	}
 }

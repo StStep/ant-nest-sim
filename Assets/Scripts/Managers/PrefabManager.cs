@@ -15,7 +15,7 @@ public class PrefabManager : MonoBehaviour {
 	// TODO Generalize and organize
 	public Nest nestPrefab;
 	public RottenApple applePrefab;
-	public GameObject pathPrefab;
+    public StraightPath straightPathPrefab;
 	public WorkerAnt workerAntPrefab;
 
 	void Awake()
@@ -59,37 +59,16 @@ public class PrefabManager : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Creates a Path prefab connected the nodes at the given positions,
+	/// Creates a SraightPath prefab without any connections.
 	/// </summary>
-	/// <returns>The spawned Path gameobject</returns>
-	/// <param name="startPosition">The position of the node to start the path at.</param>
-	/// <param name="endPosition">THe position of the node that the path goes to.</param>
+    /// <returns>The spawned SraightPath gameobject</returns>
 	/// <para>
-	/// This function spawns a Path gameobject with the proper position, rotation,  
-	/// and scale to connect the nodes at the provided positions
+    /// This function spawns a SraightPath gameobject without any connections.
 	/// </para>
-	public GameObject CreatePathObject(Vector2 startPosition, Vector2 endPosition)
+    public StraightPath CreateStraightPathObject()
 	{
-		// Calculate middle point and rotation bewteen positions
-		Vector2 direction = endPosition - startPosition;
-		Vector2 position = (direction/2f) + startPosition;
-		float rotAngle = Vector2.Angle(direction, Vector2.right);
-		Quaternion rotation = Quaternion.Euler(0, 0, -rotAngle);
-
-		// Create object, no roation until after scaling
-		GameObject newPath = Instantiate(pathPrefab, position, Quaternion.identity) as GameObject;
-
-		// Calculate the new scale, for the distance between the two node circles
-		float currentSize = newPath.GetComponent<SpriteRenderer>().bounds.size.x;
-		Vector3 scale = newPath.transform.localScale;
-		float targetSize = direction.magnitude - .90f; // The node circle radii are .45f
-		scale.x = targetSize * scale.x / currentSize;
-		newPath.transform.localScale = scale;
-
-		// Rotate after scaling
-		newPath.transform.rotation = rotation;
-
-		return newPath;
+        StraightPath newStraightPath = Instantiate(straightPathPrefab, Vector3.zero, Quaternion.identity) as StraightPath;
+		return newStraightPath;
 	}
 
 	/// <summary>

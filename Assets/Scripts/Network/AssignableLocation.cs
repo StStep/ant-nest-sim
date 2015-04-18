@@ -13,14 +13,14 @@ public abstract class AssignableLocation : Location {
 	protected const int _workerAddNumber = 10;
 	
 	/// <summary>
-	/// A path object holding the path from this location to the nest
+	/// A route object holding the path from this location to the nest
 	/// </summary>
-	protected Path pathToNest;
+	protected Route routeToNest;
 	
 	/// <summary>
-	/// A path object holding a path from the nest to this location
+    /// A route object holding a path from the nest to this location
 	/// </summary>
-	protected Path pathToThis;
+	protected Route routeToThis;
 	
 	/// <summary>
 	/// This initializes this instance, for intializaing internal objects 
@@ -30,8 +30,8 @@ public abstract class AssignableLocation : Location {
 	{
 		base.Init();
 		
-		pathToThis = null;
-		pathToNest = null;
+		routeToThis = null;
+		routeToNest = null;
 	}
 	
 	protected override void Awake()
@@ -50,39 +50,39 @@ public abstract class AssignableLocation : Location {
 	/// </para>
 	public override void ClickUp()
 	{
-		AttemptToPathToNest();
+		AttemptToRouteToNest();
 		
 		if (clickStatus == ClickType.LeftClick)
 		{
-			if(pathToNest != null && pathToThis != null)
+			if(routeToNest != null && routeToThis != null)
 			{
 				List<WorkerAnt> takenAnts = NetworkManager.instance.nest.TakeWorkerAnts(_workerAddNumber);
-				string orderName = "Streaming to Rotten Apple ID " + LocationID.ToString();
+				string orderName = "Streaming to Rotten Apple ID " + LocID.ToString();
 				foreach(WorkerAnt ant in takenAnts)
 				{
 					ant.assigned = true;
 					ant.assignedLocation = this;
 					workerAntList.Insert(0, ant);
 					
-					ant.OrderToStream(orderName, pathToThis, pathToNest);
+					ant.OrderToStream(orderName, routeToThis, routeToNest);
 				}
 				upperText.text = WorkerAntCount + " Workers";
 			}
 			else
 			{
-				Debug.Log ("Left clicked on Rotten Apple ID " + LocationID.ToString() + " but no paths");
+                Debug.Log ("Left clicked on Rotten Apple ID " + LocID.ToString() + " but no paths");
 			}
 		}
 		else if (clickStatus == ClickType.RightClick)
 		{
-			if(pathToNest != null && pathToThis != null)
+			if(routeToNest != null && routeToThis != null)
 			{
 				UnassignWorkerAnts(_workerAddNumber);
 				upperText.text = WorkerAntCount + " Workers";
 			}
 			else
 			{
-				Debug.Log ("Right clicked on Rotten Apple ID " + LocationID.ToString() + " but no paths");
+                Debug.Log ("Right clicked on Rotten Apple ID " + LocID.ToString() + " but no paths");
 			}
 		}
 	}
@@ -124,25 +124,25 @@ public abstract class AssignableLocation : Location {
 		return unassignAmount;
 	}
 	
-	// TODO Fix this once path caching is in, should look for path update/removal, change
+    // TODO Fix this once route caching is in, should look for route update/removal, change
 	
 	/// <summary>
-	/// This funcion finds the paths to the nest and back if they are
+    /// This funcion finds the routes to the nest and back if they are
 	/// not set yet.
 	/// </summary>
-	protected void AttemptToPathToNest()
+	protected void AttemptToRouteToNest()
 	{
-		// Try to find a path to the this location
-		if(pathToThis == null)
+        // Try to find a route to the this location
+		if(routeToThis == null)
 		{
-			pathToThis = NetworkManager.instance.LocationNetwork.GetPath(NetworkManager.instance.nest.networkNode, networkNode);
+			routeToThis = NetworkManager.instance.LocationNetwork.GetRoute(NetworkManager.instance.nest, this);
 		}
 		
-		// If a path to the nest doesn't exists, and path to this does, create the reverse path
-		if(pathToNest == null && pathToThis != null)
+        // If a route to the nest doesn't exists, and route to this does, create the reverse route
+		if(routeToNest == null && routeToThis != null)
 		{
-			pathToNest = pathToThis.Clone();
-			pathToNest.Reverse();
+			routeToNest = routeToThis.Clone();
+			routeToNest.Reverse();
 		}
 	}
 }

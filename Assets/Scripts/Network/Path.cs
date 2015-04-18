@@ -1,92 +1,82 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 /// <summary>
-/// A class acting as an ordered list of <see cref="Node"/> objects.
+/// Path objects represent the connections bewteen locations.
 /// </summary>
-public class Path :IEnumerable<Node>
+public abstract class Path : MonoBehaviour 
 {
-	/// The list of nodes wrapped by this class
-	private List<Node> _nodelist;
+    /// <summary>
+    /// The estimated cost of taking this path
+    /// </summary>
+    public int Cost;
 
-	/// <summary>
-	/// Initializes a new instance of the <see cref="Path"/> class.
-	/// </summary>
-	public Path()
-	{
-		_nodelist = new List<Node>();
+    /// <summary>
+    /// Location A of the path
+    /// </summary>
+    protected Location _locA;
+    /// <summary>
+    /// Gets Location A of the path.
+    /// </summary>
+    /// <value>A reference to Location A.</value>
+    public Location LocationA
+    {
+        get
+        {
+            return _locA;
+        }
+    }
+
+    /// <summary>
+    /// Location B of the path
+    /// </summary>
+    protected Location _locB;
+    /// <summary>
+    /// Gets Location B of the path.
+    /// </summary>
+    /// <value>A reference to Location B.</value>
+    public Location LocationB
+    {
+        get
+        {
+            return _locB;
+        }
+    }
+
+	// Use this for initialization
+	protected void Start () {
+	
+	}
+	
+	// Update is called once per frame
+    protected void Update () {
+	
 	}
 
-	/// <summary>
-	/// Gets or sets the <see cref="Path"/> at the specified index.
-	/// </summary>
-	/// <param name="index">Index to use</param>
-	public Node this[int index]  
-	{  
-		get { return _nodelist[index]; }  
-		set { _nodelist.Insert(index, value); }  
-	}
+    /// <summary>
+    /// This function connects the two locations, and configures the path for the connection.
+    /// </summary>
+    /// <param name="locationA">Location A of the path.</param>
+    /// <param name="locationB">Location B of the path.</param>
+    public void ConnectLocations(Location locationA, Location locationB)
+    {
+        if(_locA != null || _locB != null)
+        {
+            Debug.Log("Path.ConnectLocations(): ERROR - Path already connected");
+            return;
+        }
 
-	/// <summary>
-	/// Gets the count of the list.
-	/// </summary>
-	/// <value>The count.</value>
-	public int Count
-	{
-		get
-		{
-			return _nodelist.Count;
-		}
-	}
+        _locA = locationA;
+        _locB = locationB;
 
-	/// <summary>
-	/// Adds the node to the path.
-	/// </summary>
-	/// <param name="node">Node to add</param>
-	public void AddNode(Node node)
-	{
-		_nodelist.Add(node);
-	}
+        locationA.AddConnection(locationB, this);
+        locationB.AddConnection(locationA, this);
 
-	/// <summary>
-	/// Gets the enumerator for iteration.
-	/// </summary>
-	/// <returns>The enumerator.</returns>
-	public IEnumerator<Node> GetEnumerator()
-	{
-		return _nodelist.GetEnumerator();
-	}
+        CalculateDimensions();
+    }
 
-	/// <summary>
-	/// Gets the enumerator for the IEnumerable interface
-	/// </summary>
-	/// <returns>The enumerator.</returns>
-	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-	{
-		return this.GetEnumerator();
-	}
-
-	/// <summary>
-	/// Reverse this path.
-	/// </summary>
-	public void Reverse()
-	{
-		_nodelist.Reverse();
-	}
-
-	/// <summary>
-	/// This function returns a shallow copy of the Path
-	/// </summary>
-	/// <returns>A shallow copy of the path</returns>
-	public Path Clone()
-	{
-		Path newPath = new Path();
-		foreach(Node node in _nodelist)
-		{
-			newPath.AddNode(node);
-		}
-
-		return newPath;
-	}
+    /// <summary>
+    /// Calculates the dimensions for a the path object bewteen locations A and B.
+    /// </summary>
+    protected abstract void CalculateDimensions();
 }

@@ -3,7 +3,7 @@ using System.Collections;
 
 /// <summary>
 /// This class is a signleton used for creating and providing an interface to the
-/// node network.
+/// location network.
 /// </summary>
 public class NetworkManager : MonoBehaviour {
 
@@ -19,7 +19,7 @@ public class NetworkManager : MonoBehaviour {
 
 	/// <summary>
 	/// This function request a unique location ID for finding
-	/// specific nodes in the network.
+	/// specific locations in the network.
 	/// </summary>
 	/// <returns>The next location ID.</returns>
 	public static int GetNextLocID() {
@@ -27,12 +27,12 @@ public class NetworkManager : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// The network of the nodes referencing the locations.
+	/// The network of the locations.
 	/// </summary>
 	[HideInInspector]public Network LocationNetwork;
 
 	/// <summary>
-	/// The Nest, the primary node of the network.
+	/// The Nest, the primary location of the network.
 	/// </summary>
 	[HideInInspector]public Nest nest;
 
@@ -66,30 +66,30 @@ public class NetworkManager : MonoBehaviour {
 		nest.transform.SetParent(transform);
 		LocationNetwork = new Network();
 		
-		// TODO Temp Create network
+		// TODO Temp Create network location
 		RottenApple[] tempApples = new RottenApple[appleVecList.Length];
 		for(int i = 0; i < appleVecList.Length; i++)
 		{
 			tempApples[i] = PrefabManager.instance.CreateAppleObject(appleVecList[i]);
 			tempApples[i].transform.SetParent(transform);
-		}
 
-		CreateNetworkPath(nest, tempApples);
+            // Create network connections
+            CreateNetworkPath(nest, tempApples[i]);
+        }
+
+
 	}
 
 	/// <summary>
-	/// The function creates a path gameobject from the parent node to the children nodes.
+    /// The function creates a new straight path object that connects location A to location B.
 	/// </summary>
-	/// <param name="parentNode">The parent node to connect to each child node.</param>
-	/// <param name="childrenNodes">The children node to connect to the parent.</param>
-	private void CreateNetworkPath(Location parentNode, params Location[] childrenNodes)
+    /// <param name="locationA">Location A of the new path.</param>
+    /// <param name="locationB">Location B of the new path.</param>
+    private void CreateNetworkPath(Location locationA, Location locationB)
 	{
-		GameObject temPath;
-		foreach(Location location in childrenNodes)
-		{
-			LocationNetwork.ConnectNodes(parentNode.networkNode, location.networkNode);
-			temPath = PrefabManager.instance.CreatePathObject(parentNode.transform.position, location.transform.position);
-			temPath.transform.SetParent(transform);
-		}
+        StraightPath tempPath = PrefabManager.instance.CreateStraightPathObject();
+		tempPath.transform.SetParent(transform);
+
+        LocationNetwork.ConnectLocations(locationA, locationB, tempPath);
 	}
 }

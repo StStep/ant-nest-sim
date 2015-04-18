@@ -44,7 +44,7 @@ public class WorkerAnt : Ant {
 	/// <param name="orderName">The name of the order.</param>
 	/// <param name="pathToDest">The path that is from the start location to the destination location.</param>
 	/// <param name="returnPath">The path that is from the destination location to the start location.</param>
-	public bool OrderToStream(string orderName, Path pathToDest, Path returnPath)
+	public bool OrderToStream(string orderName, Route pathToDest, Route returnPath)
 	{
 		bool success = false;
 
@@ -73,7 +73,7 @@ public class WorkerAnt : Ant {
 	/// back to the start location. The starting location is exited at the before the 
 	/// movement loop, and entered at the after the loop ends. Each node in between is visited.
 	/// </para>
-	protected IEnumerator OrdStream(Path pathToDest, Path returnPath)
+	protected IEnumerator OrdStream(Route pathToDest, Route returnPath)
 	{
 		// Check pathing reqiurements
 		if((pathToDest[0] != returnPath[returnPath.Count - 1]) ||
@@ -85,7 +85,7 @@ public class WorkerAnt : Ant {
 		}
 
 		// Exit the starting node
-		yield return StartCoroutine(pathToDest[0].Location.Exit(this));
+		yield return StartCoroutine(pathToDest[0].Exit(this));
 
 		// Repeat movement until no longer assigned to order
 		while(assigned)
@@ -98,7 +98,7 @@ public class WorkerAnt : Ant {
 				yield return StartCoroutine(ActMoveToPosition(pathToDest[i].Position));
 
 				// Enter Node 
-				yield return StartCoroutine(pathToDest[i].Location.Visit(this));
+				yield return StartCoroutine(pathToDest[i].Visit(this));
 
 				// If the ant is full after any node or needs food, return to origin, starting from current node
 				if(this.IsFull || isStarving)
@@ -115,14 +115,14 @@ public class WorkerAnt : Ant {
 				yield return StartCoroutine(ActMoveToPosition(returnPath[i].Position));
 
 				// Enter Node 
-				yield return StartCoroutine(returnPath[i].Location.Visit(this));
+				yield return StartCoroutine(returnPath[i].Visit(this));
 			}
 		}
 		// Go idle having finished movement
 		currentOrder = "";
 
 		// Enter the starting node
-		yield return StartCoroutine(pathToDest[0].Location.Enter(this));
+		yield return StartCoroutine(pathToDest[0].Enter(this));
 	}
 
 	#endregion
