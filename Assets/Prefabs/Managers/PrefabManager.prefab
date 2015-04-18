@@ -41,7 +41,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nestPrefab: {fileID: 11442460, guid: 18e442d4b4f90024bb4095615e387ff1, type: 2}
   applePrefab: {fileID: 11483772, guid: e468d9c956afa0d44bf8c9f56dce7055, type: 2}
-  pathPrefab: {fileID: 11474830, guid: fb39ba35830231f47a0358540ca976d8, type: 2}
+  straightPathPrefab: {fileID: 11474830, guid: fb39ba35830231f47a0358540ca976d8, type: 2}
   workerAntPrefab: {fileID: 11432838, guid: 9fcf8b41981a54549b8af73d04cad23f, type: 2}
 --- !u!1001 &100100000
 Prefab:
