@@ -9,9 +9,9 @@ GameObject:
   m_Component:
   - 4: {fileID: 476926}
   - 212: {fileID: 21268036}
-  - 58: {fileID: 5800590}
   - 114: {fileID: 11470330}
   - 114: {fileID: 11442460}
+  - 58: {fileID: 5895282}
   m_Layer: 0
   m_Name: nest
   m_TagString: Untagged
@@ -113,7 +113,7 @@ Transform:
   - {fileID: 451166}
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!58 &5800590
+--- !u!58 &5895282
 CircleCollider2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -125,7 +125,7 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: .469999999
+  m_Radius: .449999988
 --- !u!114 &11421070
 MonoBehaviour:
   m_ObjectHideFlags: 1

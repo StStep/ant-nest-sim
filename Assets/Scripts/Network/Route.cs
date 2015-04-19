@@ -7,8 +7,9 @@ using System.Collections.Generic;
 /// </summary>
 public class Route :IEnumerable<Location>
 {
-    // TODO Edit this for better use by upper things, make it not editable after creation?
-    // How about make it reusable? Maybe Assignments feed there path into the network to rebuild?
+    // TODO How about make it reusable? Maybe Assignments feed there path into the network to rebuild?
+
+	private bool locked;
 
 	/// The list of locations wrapped by this class
 	private List<Location> _locList;
@@ -19,6 +20,7 @@ public class Route :IEnumerable<Location>
 	public Route()
 	{
 		_locList = new List<Location>();
+		locked = false;
 	}
 
 	/// <summary>
@@ -27,8 +29,17 @@ public class Route :IEnumerable<Location>
 	/// <param name="index">Index to use</param>
 	public Location this[int index]  
 	{  
-		get { return _locList[index]; }  
-		set { _locList.Insert(index, value); }  
+		get 
+		{ 
+			return _locList[index]; 
+		}  
+		set 
+		{ 
+			if(!locked) 
+			{
+				_locList.Insert(index, value); 
+			}
+		}  
 	}
 
 	/// <summary>
@@ -49,7 +60,10 @@ public class Route :IEnumerable<Location>
     /// <param name="location">Location to add</param>
 	public void AddLocation(Location location)
 	{
-		_locList.Add(location);
+		if(!locked) 
+		{
+			_locList.Add(location);
+		}
 	}
 
 	/// <summary>
@@ -75,10 +89,21 @@ public class Route :IEnumerable<Location>
 	/// </summary>
 	public void Reverse()
 	{
-		_locList.Reverse();
+		if(!locked) 
+		{
+			_locList.Reverse();
+		}
 	}
 
 	/// <summary>
+	/// Lock this instance.
+	/// </summary>
+	public void Lock()
+	{
+		locked = true;
+	}
+	
+/*	/// <summary>
     /// This function returns a shallow copy of the Route
 	/// </summary>
     /// <returns>A shallow copy of the Route</returns>
@@ -91,5 +116,5 @@ public class Route :IEnumerable<Location>
 		}
 
 		return newRoute;
-	}
+	}*/
 }

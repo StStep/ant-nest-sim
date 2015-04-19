@@ -70,6 +70,7 @@ public class PrefabManager : MonoBehaviour {
     public StraightPath CreateStraightPathObject()
 	{
         StraightPath newStraightPath = Instantiate(straightPathPrefab, Vector3.zero, Quaternion.identity) as StraightPath;
+		newStraightPath.Init();
 		return newStraightPath;
 	}
 

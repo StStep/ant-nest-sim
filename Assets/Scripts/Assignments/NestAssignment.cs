@@ -86,65 +86,21 @@ public class NestAssignment : Assignment
 			_assignedWorkers.Insert(0, tempAnt);
         }
         
-		_assignedNest.upperText.text = Count + " Workers";
+		UpdateAssignmentText();
     }
 
-	public override void AssignWorkers(List<WorkerAnt> workers)
+	protected override void HandleAssignedWorker(WorkerAnt assignedAnt)
 	{
-		foreach(WorkerAnt worker in workers)
-		{
-			_assignedWorkers.Add(worker);
-			worker.Unassign(); // Nest assignment is inverse
-		}
-		
+		assignedAnt.Unassign(); // Nest assignment is inverse
+	}
+
+	protected override void UpdateAssignmentText()
+	{
 		_assignedNest.upperText.text = Count + " Workers";
 	}
 
-    /// <summary>
-    /// This function removes workers up to the paramter, if able, 
-    /// and returns a list of the worker ants.
-    /// </summary>
-    /// <returns>A list of worker ants taken from the nest.</returns>
-    /// <param name="amount">The amount of workers to try and remove from
-    /// the Nest.</param>
-	public override List<WorkerAnt> UnassignWorkers(int amount)
-    {
-        List<WorkerAnt> retList = new List<WorkerAnt>();
-        if(amount < 0)
-        {
-            return retList;
-        }
-        
-        int takeAmount = 0;
-        if(Count >= amount)
-        {
-            takeAmount = amount;
-        }
-        else
-        {
-            takeAmount = Count;
-        }
-        
-        // Move ants to return queue
-        int startingCount = Count;
-        int foundAmount = 0;
-        for(int i = 0; i < startingCount; i++)
-        {
-            // Only take idle workers
-			if(_assignedWorkers[Count - 1].IsIdle)
-            {
-				retList.Add(_assignedWorkers[Count - 1]);
-				_assignedWorkers.RemoveAt(Count - 1);
-                if(++foundAmount == takeAmount)
-                {
-                    break;
-                }
-            }
-        }
-        
-        // Update worker count
-		_assignedNest.upperText.text = Count + " Workers";
-
-        return retList;
-    }
+	protected override bool CheckUnassignReq(WorkerAnt ant)
+	{
+		return ant.IsIdle;
+	}
 }

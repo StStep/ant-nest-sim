@@ -11,7 +11,6 @@ GameObject:
   - 212: {fileID: 21204822}
   - 95: {fileID: 9583258}
   - 114: {fileID: 11432838}
-  - 50: {fileID: 5020302}
   m_Layer: 0
   m_Name: workerAnt
   m_TagString: Untagged
@@ -31,21 +30,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!50 &5020302
-Rigidbody2D:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 188292}
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0
-  m_GravityScale: 0
-  m_FixedAngle: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_SleepingMode: 2
-  m_CollisionDetection: 0
 --- !u!95 &9583258
 Animator:
   serializedVersion: 3
@@ -74,8 +58,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 411f5395bbc339249a9aff05d6266fad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveTime: .600000024
-  assigned: 0
+  carryType: 0
+  inNest: 0
 --- !u!212 &21204822
 SpriteRenderer:
   m_ObjectHideFlags: 1

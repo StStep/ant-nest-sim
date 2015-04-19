@@ -8,12 +8,13 @@ public enum CarryType { None, Food};
 /// <summary>
 /// This class is used to represent an ant unit in the game.
 /// </summary>
-public class Ant : MonoBehaviour , IEquatable<Ant>
+public abstract class Ant : MonoBehaviour , IEquatable<Ant>
 {
 
     // TODO Ant functions should be called top down from Assignments
 
 	public const float timeToMoveOneUnit = .5f;
+	public const float inverseMoveTime = 1f / timeToMoveOneUnit;
 	public const float carryCapacity = 10f;
 	public const float foodEnegryCapacity = 1f;
 	public const float minLifespan = 20f;
@@ -21,6 +22,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
     public const float secPerAntUpdate = .5f;
     public const float energyUsageSec = .25f;
     protected const float EnergyUsedPerAntUpdate = energyUsageSec*secPerAntUpdate;
+
 
 	/// <summary>
 	/// The type stuff the ant is carrying.
@@ -86,11 +88,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
     /// The amount of energy due to food the ant has
     /// </summary>
     protected float foodEnergy;
-    
-    /// <summary>
-    /// The inverse move time, pre-calculated for efficiency
-    /// </summary>
-    protected float inverseMoveTime;
+
     
     /// <summary>
     /// The current order the ant is following.
@@ -129,8 +127,6 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	public virtual void Init()
 	{
 		_antID = GameManager.GetNextAntID();
-		inverseMoveTime = 1f / timeToMoveOneUnit;
-		enabled = false;
 		ResetState();
 	}
 
@@ -164,7 +160,7 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	/// </summary>
 	public virtual void Birth()
 	{
-		enabled = true;
+		//enabled = true;
 
 		// Reset state
 		ResetState();
@@ -194,6 +190,12 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 	protected virtual void Update () 
 	{
 
+	}
+
+	protected virtual void Start()
+	{
+		enabled = false;
+		Hide();
 	}
 
 	/// <summary>
@@ -302,4 +304,6 @@ public class Ant : MonoBehaviour , IEquatable<Ant>
 		if (ant == null) return false;
 		return (this.AntID.Equals(ant.AntID));
 	}
+
+	public abstract void HandleLocationExit();
 }

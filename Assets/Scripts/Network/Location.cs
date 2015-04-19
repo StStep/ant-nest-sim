@@ -223,4 +223,19 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
             Debug.Log("You right clicked on a location");
         }
     }
+
+	public virtual void Enter(Ant ant)
+	{
+		Exit(ant);
+	}
+
+	public virtual void Exit(Ant ant)
+	{
+		ant.HandleLocationExit();
+	}
+
+	public virtual void TakePathTo(Ant ant, Location destLocation)
+	{
+		_connectedPaths[destLocation.LocID].TakePathFrom(ant, this);
+	}
 }

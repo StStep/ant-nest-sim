@@ -15,7 +15,7 @@ public abstract class Assignment: MonoBehaviour
 		}
 	}
 
-    public int Count
+    public virtual int Count
     {
         get
 		{
@@ -41,6 +41,7 @@ public abstract class Assignment: MonoBehaviour
     public virtual void Init()
     {
 		_assignedWorkers = new List<WorkerAnt>();
+		enabled = false;
     }
 
 	// Use this for initialization
@@ -57,7 +58,7 @@ public abstract class Assignment: MonoBehaviour
 	{
 		enabled = true;
 		_assignedLoc = location;
-		_assignedLoc.upperText.text = Count + " Workers";
+		UpdateAssignmentText();
 	}
 	
 	public virtual void LocationDisconnect()
@@ -67,17 +68,39 @@ public abstract class Assignment: MonoBehaviour
 		_assignedLoc = null;
 	}
 
+	protected virtual void UpdateAssignmentText()
+	{
+		_assignedLoc.upperText.text = Count + " Workers";
+	}
+
+	protected virtual void HandleAssignedWorker(WorkerAnt assignedAnt)
+	{
+		assignedAnt.Assign();
+	}
+
+	protected virtual bool CheckUnassignReq(WorkerAnt ant)
+	{
+		return true;
+	}
+
 	public virtual void AssignWorkers(List<WorkerAnt> workers)
 	{
 		foreach(WorkerAnt worker in workers)
 		{
 			_assignedWorkers.Add(worker);
-			worker.Assign();
+			HandleAssignedWorker(worker);
 		}
 		
-		_assignedLoc.upperText.text = Count + " Workers";
+		UpdateAssignmentText();
 	}
 	
+	/// <summary>
+	/// This function removes workers up to the paramter, if able, 
+	/// and returns a list of the worker ants.
+	/// </summary>
+	/// <returns>A list of worker ants taken from the assignment.</returns>
+	/// <param name="amount">The amount of workers to try and remove from
+	/// the assignment.</param>
 	public virtual List<WorkerAnt> UnassignWorkers(int amount)
 	{
 		List<WorkerAnt> retList = new List<WorkerAnt>();
@@ -85,8 +108,8 @@ public abstract class Assignment: MonoBehaviour
 		{
 			return retList;
 		}
-
-		int takeAmount;
+		
+		int takeAmount = 0;
 		if(Count >= amount)
 		{
 			takeAmount = amount;
@@ -95,15 +118,25 @@ public abstract class Assignment: MonoBehaviour
 		{
 			takeAmount = Count;
 		}
-
-		for(int i = 0; i < takeAmount; i ++)
+		
+		// Move ants to return queue
+		int startingCount = Count;
+		int foundAmount = 0;
+		for(int i = 0; i < startingCount; i++)
 		{
-			retList.Add(_assignedWorkers[Count - 1]);
-			_assignedWorkers.RemoveAt(Count - 1);
+			// Only unassign ants that pass the requirement
+			if(CheckUnassignReq(_assignedWorkers[Count - 1]))
+			{
+				retList.Add(_assignedWorkers[Count - 1]);
+				_assignedWorkers.RemoveAt(Count - 1);
+				if(++foundAmount == takeAmount)
+				{
+					break;
+				}
+			}
 		}
-
-		// Update worker count
-		_assignedLoc.upperText.text = Count + " Workers";
+		
+		UpdateAssignmentText();
 		
 		return retList;
 	}

@@ -108,4 +108,23 @@ public class Nest : Location {
 
 		return takeAmount;
 	}
+
+	public override void Enter(Ant ant)
+	{
+		ant.inNest = true;
+
+		// If ant is now idle, stop movement
+		if(ant.IsIdle)
+		{
+			return;
+		}
+
+		base.Enter(ant);
+	}
+
+	public override void Exit(Ant ant)
+	{
+		ant.inNest = false;
+		base.Exit(ant);
+	}
 }

@@ -34,7 +34,7 @@ public class NetworkManager : MonoBehaviour {
 	/// <summary>
 	/// The Nest, the primary location of the network.
 	/// </summary>
-	[HideInInspector]private Nest nest;
+	private Nest nest;
 
 	//TODO this a temp creation method 
 	public Vector2[] appleVecList;
@@ -81,8 +81,6 @@ public class NetworkManager : MonoBehaviour {
             // Create network connections
             CreateNetworkPath(nest, tempApples[i]);
         }
-
-
 	}
 
 	/// <summary>
@@ -96,5 +94,15 @@ public class NetworkManager : MonoBehaviour {
 		tempPath.transform.SetParent(transform);
 
         LocationNetwork.ConnectLocations(locationA, locationB, tempPath);
+	}
+
+	/// <summary>
+	/// Gets the route to nest from the given location.
+	/// </summary>
+	/// <returns>The route to nest from the given location</returns>
+	/// <param name="startLocation">The location to find a route starting from.</param>
+	public Route GetRouteToNest(Location startLocation)
+	{
+		return LocationNetwork.GetRoute(startLocation, nest);
 	}
 }

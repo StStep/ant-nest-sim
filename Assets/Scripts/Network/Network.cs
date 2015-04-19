@@ -194,8 +194,9 @@ public class Network {
 			parent = parent.parentSearchNode;
 		}
 
-        // Reverse route becuase it was created from goal to start
+        // Reverse route becuase it was created from goal to start then lock it
 		retRoute.Reverse();
+		retRoute.Lock();
 
 		return retRoute;
 	}
