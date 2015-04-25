@@ -39,13 +39,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6923947a822145c4c956daeda1e8cd46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nest: {fileID: 0}
   appleVecList:
+  - {x: 3, y: 0}
   - {x: 0, y: 2}
-  - {x: 4, y: 0}
   - {x: -2, y: 0}
   - {x: 1.5, y: -2.5}
   - {x: -1.5, y: -2.5}
+  childrenVecList:
+  - {x: 4, y: -2}
+  - {x: 4, y: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

@@ -36,8 +36,11 @@ public class NetworkManager : MonoBehaviour {
 	/// </summary>
 	private Nest nest;
 
-	//TODO this a temp creation method 
+	//  this a temp creation method 
 	public Vector2[] appleVecList;
+
+	// TODO this is a temp creation method for testinh
+	public Vector2[] childrenVecList;
 
 	void Awake()
 	{
@@ -53,25 +56,22 @@ public class NetworkManager : MonoBehaviour {
 		
 		//Sets this to not be destroyed when reloading scene
 		DontDestroyOnLoad(gameObject);
-
-		CreateNetwork();
 	}
 
     void Start() 
     {
-        GameManager.instance.nestAssignment.LocationConnect(nest);
     }
 
 	/// <summary>
 	/// This function initializes and forms the location network.
 	/// </summary>
-	private void CreateNetwork()
+	public Nest CreateNetwork()
 	{
-		nest = PrefabManager.instance.CreateNestObject(Vector2.zero);
-		nest.transform.SetParent(transform);
-		LocationNetwork = new Network();
+		this.nest = PrefabManager.instance.CreateNestObject(Vector2.zero);
+		this.nest.transform.SetParent(transform);
+		this.LocationNetwork = new Network();
 		
-		// TODO Temp Create network location
+		// TODO Temp Create network location, around nest
 		RottenApple[] tempApples = new RottenApple[appleVecList.Length];
 		for(int i = 0; i < appleVecList.Length; i++)
 		{
@@ -79,8 +79,21 @@ public class NetworkManager : MonoBehaviour {
 			tempApples[i].transform.SetParent(transform);
 
             // Create network connections
-            CreateNetworkPath(nest, tempApples[i]);
+			CreateNetworkPath(this.nest, tempApples[i]);
         }
+
+		// TODO Temp Create children nodes on first nest connected apple
+		RottenApple[] tempChildApples = new RottenApple[childrenVecList.Length];
+		for(int i = 0; i < childrenVecList.Length; i++)
+		{
+			tempChildApples[i] = PrefabManager.instance.CreateAppleObject(childrenVecList[i]);
+			tempChildApples[i].transform.SetParent(transform);
+			
+			// Create network connections
+			CreateNetworkPath(tempApples[0], tempChildApples[i]);
+		}
+
+		return this.nest;
 	}
 
 	/// <summary>
@@ -93,7 +106,7 @@ public class NetworkManager : MonoBehaviour {
         StraightPath tempPath = PrefabManager.instance.CreateStraightPathObject();
 		tempPath.transform.SetParent(transform);
 
-        LocationNetwork.ConnectLocations(locationA, locationB, tempPath);
+        this.LocationNetwork.ConnectLocations(locationA, locationB, tempPath);
 	}
 
 	/// <summary>
@@ -103,6 +116,6 @@ public class NetworkManager : MonoBehaviour {
 	/// <param name="startLocation">The location to find a route starting from.</param>
 	public Route GetRouteToNest(Location startLocation)
 	{
-		return LocationNetwork.GetRoute(startLocation, nest);
+		return this.LocationNetwork.GetRoute(startLocation, this.nest);
 	}
 }

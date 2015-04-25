@@ -16,19 +16,40 @@ using System.Collections.Generic;
 /// Therefore, any network changes should be handled carefully, with new route requests
 /// being frequent.
 /// </remarks>
-public class Network {
-	  
+public class Network
+{
 	// TODO Store a cache of past route searches, clearing the route list when the network changes
 	// As a way of avoiding doing A* searches for the same destination/start or the compliment
 
 	/// A dictionary of locaitons in the network, using the location ID of the nodes 
-	protected Dictionary<int, Location> _netLocs;
+	protected Dictionary<int, Location> netLocs;
+
+	protected List<Path> netPaths;
+
+	protected Dictionary<RouteKey, Route> routeCache;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Network"/>.
 	/// </summary>
 	public Network() {
-		_netLocs = new Dictionary<int, Location>();
+		netLocs = new Dictionary<int, Location>();
+		routeCache = new Dictionary<RouteKey, Route>();
+		netPaths = new List<Path>();
+	}
+
+	public void NetworkUpdate()
+	{
+		// Call update on each path
+		foreach(Path path in netPaths)
+		{
+			path.PathUpdate();
+		}
+
+		// Call update on each location
+		foreach(Location location in netLocs.Values)
+		{
+			location.LocationUpdate();
+		}
 	}
 
 	/// <summary>
@@ -39,8 +60,9 @@ public class Network {
     /// <param name="pathBetween">The path to use to connect the two given locations.</param>
     public void ConnectLocations(Location locationA, Location locationB, Path pathBetween)
 	{
-		_netLocs[locationA.LocID] = locationA;
-		_netLocs[locationB.LocID] = locationB;
+		netLocs[locationA.LocID] = locationA;
+		netLocs[locationB.LocID] = locationB;
+		netPaths.Add(pathBetween);
 
         pathBetween.ConnectLocations(locationA, locationB);
 	}
@@ -61,6 +83,26 @@ public class Network {
 				((locationA.Position.y - locationB.Position.y) * (locationA.Position.y - locationB.Position.y) );
 	}
 
+	public Route GetRoute(Location startLoc, Location endLoc)
+	{
+		Route retRoute;
+		RouteKey routeKey = new RouteKey(startLoc.LocID, endLoc.LocID);
+
+		// Try to get the route from the cache
+		if(routeCache.TryGetValue(routeKey, out retRoute))
+		{
+			retRoute = routeCache[routeKey];
+		}
+		// If not in cache, generate and add it
+		else 
+		{
+			retRoute = CalculateRoute(startLoc, endLoc);
+			routeCache.Add(routeKey, retRoute);
+		}
+
+		return retRoute;
+	}
+
 	/// <summary>
     /// This function returns an object of the class <see cref="Route"/> if 
 	/// a route exists bewteen the provided locations. Otherwise, NULL is returned.
@@ -72,7 +114,7 @@ public class Network {
     /// This function uses and A* search to find the shortest route between the two given locations
 	/// on the network.
 	/// </para>
-	public Route GetRoute(Location startLoc, Location endLoc)
+	protected Route CalculateRoute(Location startLoc, Location endLoc)
 	{
 		if(startLoc == null || endLoc == null)
 		{
@@ -90,8 +132,8 @@ public class Network {
 		Location start;
 		Location goal;
 
-		_netLocs.TryGetValue(startLoc.LocID, out start);
-		_netLocs.TryGetValue(endLoc.LocID, out goal);
+		netLocs.TryGetValue(startLoc.LocID, out start);
+		netLocs.TryGetValue(endLoc.LocID, out goal);
 		if(start == null || goal == null)
 		{
 			return null;

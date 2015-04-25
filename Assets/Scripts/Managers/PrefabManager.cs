@@ -16,8 +16,6 @@ public class PrefabManager : MonoBehaviour {
 	public Nest nestPrefab;
 	public RottenApple applePrefab;
     public StraightPath straightPathPrefab;
-	public WorkerAnt workerAntPrefab;
-    public NestAssignment nestAssignmentPrefab;
     public StreamAssignment streamAssignmentPrefab;
 
 	void Awake()
@@ -73,25 +71,6 @@ public class PrefabManager : MonoBehaviour {
 		newStraightPath.Init();
 		return newStraightPath;
 	}
-
-	/// <summary>
-	/// Creates a WorkerAnt prefab at the given position,
-	/// </summary>
-	/// <returns>The spawned WorkerAnt gameobject</returns>
-	/// <param name="position">The position to spawn the gameobject at.</param>
-	public WorkerAnt CreateWorkerAntObject(Vector2 position)
-	{
-		WorkerAnt newWorker = Instantiate(workerAntPrefab, position, Quaternion.identity) as WorkerAnt;
-		newWorker.Init();
-		return newWorker;
-	}
-
-    public NestAssignment CreateNestAssignment()
-    {
-        NestAssignment nestAssignment = Instantiate(nestAssignmentPrefab,  Vector3.zero, Quaternion.identity) as NestAssignment;
-        nestAssignment.Init();
-        return nestAssignment;
-    }
 
     public StreamAssignment CreateStreamAssignment()
     {

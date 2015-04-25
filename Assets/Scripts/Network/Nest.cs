@@ -25,6 +25,11 @@ public class Nest : Location {
 	/// </summary>
 	protected float foodStorage;
 
+	public int antsInNest;
+
+	// Ant reuse pool
+	public Queue<Ant> antReusePool;
+
 	/// <summary>
 	/// This initializes this instance, for intializaing internal objects 
 	/// before Awake() is called.
@@ -33,9 +38,8 @@ public class Nest : Location {
 	{
 		base.Init();
 
+		antReusePool = new Queue<Ant>();
 		foodStorage = 1000f;
-
-		lowerText.text = ((int)foodStorage) + " Food Stored";
 	}
 
 	protected override void Awake()
@@ -78,7 +82,17 @@ public class Nest : Location {
 		}
 	}
 
+	protected override void LetVisit(Ant ant)
+	{
+		// Ants that visit the nest are subsummed into ant number
+		antsInNest++;
+		if(ant.foodCarrying > 0f)
+		{
+			foodStorage += ant.foodCarrying;
+		}
+		antReusePool.Enqueue(ant);
 
+	}
 
 	/// <summary>
 	/// Takes food from the food storage. Zero food is returned if the
@@ -86,6 +100,7 @@ public class Nest : Location {
 	/// </summary>
 	/// <returns>The amount of food taken</returns>
 	/// <param name="amount">The amount of food attempted to take.</param>
+	// TODO THis is old
 	public float TakeFood(float amount)
 	{
 		if(amount < 0f || foodStorage <= foodReserveLevel)
@@ -104,27 +119,47 @@ public class Nest : Location {
 			takeAmount = foodStorage;
 			foodStorage = 0;
 		}
-		lowerText.text = ((int)foodStorage) + " Food Stored";
 
 		return takeAmount;
 	}
 
-	public override void Enter(Ant ant)
+	public void SendAntsTo(int amount, Location location)
 	{
-		ant.inNest = true;
-
-		// If ant is now idle, stop movement
-		if(ant.IsIdle)
+		int sendAmount;
+		if(amount < 0)
 		{
-			return;
+			sendAmount = 0;
 		}
+		else if(antsInNest < amount)
+		{
+			sendAmount = antsInNest;
+			antsInNest = 0;
+		}
+		else {
+			sendAmount = amount;
+			antsInNest -= amount;
+		}
+		
+		Ant tempAnt;
+		for(int i = 0; i < sendAmount; i++)
+		{
+			// Either reuse old ant or make new
+			if(antReusePool.Count > 0)
+			{
+				tempAnt = antReusePool.Dequeue();
+				tempAnt.Reset(this,location);
+			}
+			else
+			{
+				tempAnt = new Ant(this,location);
+			}
 
-		base.Enter(ant);
+			Accept(tempAnt);
+		}
 	}
 
-	public override void Exit(Ant ant)
+	protected override void UpdateText()
 	{
-		ant.inNest = false;
-		base.Exit(ant);
+		lowerText.text = ((int)foodStorage) + " Food Stored";
 	}
 }

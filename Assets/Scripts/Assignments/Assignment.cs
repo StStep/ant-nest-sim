@@ -2,10 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// TODO Do assignments need to be gameobjects?
+
 public abstract class Assignment: MonoBehaviour
 {
-	protected List<WorkerAnt> _assignedWorkers;
-
 	protected AssignableLocation _assignedLoc;
 	public virtual AssignableLocation AssignedLocation
 	{
@@ -14,14 +14,6 @@ public abstract class Assignment: MonoBehaviour
 			return _assignedLoc;
 		}
 	}
-
-    public virtual int Count
-    {
-        get
-		{
-			return _assignedWorkers.Count;
-		}
-    }
 
 	public virtual int LocID
 	{
@@ -38,19 +30,48 @@ public abstract class Assignment: MonoBehaviour
 		}
 	}
 
+	protected int _antsPerSec = 0;
+	public int AntsPerSec
+	{
+		get
+		{
+			return _antsPerSec;
+		}
+
+		// Calculate antsPerTick whenever antsPerSec is set
+		protected set
+		{
+			_antsPerSec = value;
+			_antsPerTick = _antsPerSec*GameManager.secondsPerGameTick;
+		}
+	}
+
+	protected float _antsPerTick = 0f;
+	protected float _leftOverPerTick = 0f;
+	public int AntsPerTick
+	{
+		// This allows for partial ants per tick to build up over ticks to eventually become a whole number
+		get
+		{
+			int retInt = Mathf.FloorToInt(_antsPerTick + _leftOverPerTick);
+			_leftOverPerTick = (_antsPerTick + _leftOverPerTick) - retInt;
+			return retInt;
+		}
+	}
+
     public virtual void Init()
     {
-		_assignedWorkers = new List<WorkerAnt>();
-		enabled = false;
     }
 
 	// Use this for initialization
-	protected virtual void Start () {
-	
+	protected virtual void Start () 
+	{
+		enabled = false;
 	}
 	
 	// Update is called once per frame
-    protected virtual void Update () {
+    protected virtual void Update () 
+	{
 	
 	}
 
@@ -58,6 +79,7 @@ public abstract class Assignment: MonoBehaviour
 	{
 		enabled = true;
 		_assignedLoc = location;
+		AntsPerSec = 0;
 		UpdateAssignmentText();
 	}
 	
@@ -70,74 +92,35 @@ public abstract class Assignment: MonoBehaviour
 
 	protected virtual void UpdateAssignmentText()
 	{
-		_assignedLoc.upperText.text = Count + " Workers";
+		_assignedLoc.upperText.text = AntsPerSec + " Ants";
 	}
 
-	protected virtual void HandleAssignedWorker(WorkerAnt assignedAnt)
+	public virtual void AssignAnts(int amount)
 	{
-		assignedAnt.Assign();
-	}
-
-	protected virtual bool CheckUnassignReq(WorkerAnt ant)
-	{
-		return true;
-	}
-
-	public virtual void AssignWorkers(List<WorkerAnt> workers)
-	{
-		foreach(WorkerAnt worker in workers)
+		if(amount > 0)
 		{
-			_assignedWorkers.Add(worker);
-			HandleAssignedWorker(worker);
+			AntsPerSec += amount;
+			UpdateAssignmentText();
 		}
-		
-		UpdateAssignmentText();
+
 	}
-	
-	/// <summary>
-	/// This function removes workers up to the paramter, if able, 
-	/// and returns a list of the worker ants.
-	/// </summary>
-	/// <returns>A list of worker ants taken from the assignment.</returns>
-	/// <param name="amount">The amount of workers to try and remove from
-	/// the assignment.</param>
-	public virtual List<WorkerAnt> UnassignWorkers(int amount)
+
+	public virtual void UnassignAnts(int amount)
 	{
-		List<WorkerAnt> retList = new List<WorkerAnt>();
 		if(amount < 0)
 		{
-			return retList;
+			return;
 		}
-		
-		int takeAmount = 0;
-		if(Count >= amount)
+
+		if(amount > AntsPerSec)
 		{
-			takeAmount = amount;
+			AntsPerSec = 0;
 		}
 		else
 		{
-			takeAmount = Count;
+			AntsPerSec -= amount;
 		}
-		
-		// Move ants to return queue
-		int startingCount = Count;
-		int foundAmount = 0;
-		for(int i = 0; i < startingCount; i++)
-		{
-			// Only unassign ants that pass the requirement
-			if(CheckUnassignReq(_assignedWorkers[Count - 1]))
-			{
-				retList.Add(_assignedWorkers[Count - 1]);
-				_assignedWorkers.RemoveAt(Count - 1);
-				if(++foundAmount == takeAmount)
-				{
-					break;
-				}
-			}
-		}
-		
+
 		UpdateAssignmentText();
-		
-		return retList;
 	}
 }

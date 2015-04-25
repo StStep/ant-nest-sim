@@ -88,7 +88,8 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
     
     protected virtual void Start () 
     {
-        
+     	enabled = false;  
+		UpdateText();
     }
     
     protected virtual void Update () 
@@ -224,18 +225,51 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
         }
     }
 
-	public virtual void Enter(Ant ant)
+	public void Accept(Ant ant)
 	{
-		Exit(ant);
+		// If this is the destination location, handle ant
+		if(ant.destination == this)
+		{
+			LetVisit(ant);
+			return;
+		}
+
+		// Find which path to place ant
+		Route bestRoute = NetworkManager.instance.LocationNetwork.GetRoute(this, ant.destination);
+		if(bestRoute == null)
+		{
+			Debug.Log("Location ID " + this.LocID + ": No route found to location ID " + ant.destination.LocID);
+			return;
+		}
+
+		//Index 1 would be the next location the ant should go
+		Path nextPath = _connectedPaths[bestRoute[1].LocID];
+		if(nextPath == null)
+		{
+			Debug.Log("Location ID " + this.LocID + ": No path found to location ID " + ant.destination.LocID);
+			return;
+		}
+
+		nextPath.AcceptFrom(this, ant);
 	}
 
-	public virtual void Exit(Ant ant)
+	public virtual void LocationUpdate()
 	{
-		ant.HandleLocationExit();
+		UpdateText();
 	}
 
-	public virtual void TakePathTo(Ant ant, Location destLocation)
+	protected abstract void UpdateText();
+
+	/// <summary>
+	/// This handles what happens to the ant once it reaches this node as it's destination
+	/// </summary>
+	/// <param name="ant">The ant that is visitin.</param>
+	protected virtual void LetVisit(Ant ant)
 	{
-		_connectedPaths[destLocation.LocID].TakePathFrom(ant, this);
+		// Return the ant from where it came
+		Location temp = ant.destination;
+		ant.destination = ant.origin;
+		ant.origin = temp;
+		Accept(ant);
 	}
 }

@@ -9,41 +9,22 @@ using System.Collections.Generic;
 /// </summary>
 public class GameManager : MonoBehaviour {
 
-    public const int startWorkAntPool = 100;
-	public const int workerAssignIncrements = 10;
+    public const int startAntAmount = 100;
+	public const int antAssignIncrements = 1;
+	public const float secondsPerGameTick = 0.5f;
 
 	/// <summary>
 	/// The single current instance of this class
 	/// </summary>
 	public static GameManager instance;
 
-    public NestAssignment nestAssignment;
-
     private Dictionary<int, StreamAssignment> streamAssignmentDict;
 
     private Queue<StreamAssignment> streamPool;
 
+	private Nest nest;
 
-    /// <summary>
-    /// This is a pool of worker ant objects to pull from when birthing ants
-    /// </summary>
-    public Queue<WorkerAnt> workerAntPool;
-
-	/// <summary>
-	/// The next ant ID that will be assigned.
-	/// </summary>
-	private static int nextAntID = 0;
-	
-	/// <summary>
-	/// This function request a unique ant ID for tracking
-	/// specific ants in the game.
-	/// </summary>
-	/// <returns>The next ant ID.</returns>
-	public static int GetNextAntID() {
-		return (nextAntID++);
-	}
-	
-	void Awake()
+	protected void Awake()
 	{
 		// Only have one in game
 		if (instance == null)
@@ -58,20 +39,16 @@ public class GameManager : MonoBehaviour {
 		//Sets this to not be destroyed when reloading scene
 		DontDestroyOnLoad(gameObject);
 
-        workerAntPool = new Queue<WorkerAnt>();
         streamAssignmentDict = new Dictionary<int, StreamAssignment>();
         streamPool = new Queue<StreamAssignment>();
+	}
 
-        // Add starting ants to worker pool
-        WorkerAnt tempAnt;
-        for(int i = 0; i < startWorkAntPool; i++)
-        {
-            tempAnt = PrefabManager.instance.CreateWorkerAntObject(transform.position);
-            workerAntPool.Enqueue(tempAnt);
-            tempAnt.transform.parent = transform;
-        }
-
-        nestAssignment = PrefabManager.instance.CreateNestAssignment();
+	protected void Start()
+	{
+		nest = NetworkManager.instance.CreateNetwork();
+		nest.antsInNest = startAntAmount;
+		nest.upperText.text = nest.antsInNest + " ants";
+		StartCoroutine(GameUpdate());
 	}
 
     private StreamAssignment ConnectStreamAssignment(AssignableLocation location)
@@ -104,11 +81,6 @@ public class GameManager : MonoBehaviour {
 
     public void LeftClick(AssignableLocation location)
     {
-		if(nestAssignment.Count == 0)
-		{
-			return;
-		}
-
         StreamAssignment stream;
         if(!location.haveAssignment)
         {
@@ -120,7 +92,7 @@ public class GameManager : MonoBehaviour {
             stream = streamAssignmentDict[location.LocID];
         }
 
-		stream.AssignWorkers(nestAssignment.UnassignWorkers(workerAssignIncrements));
+		stream.AssignAnts(antAssignIncrements);
     }
     
     public void RightClick(AssignableLocation location)
@@ -132,25 +104,33 @@ public class GameManager : MonoBehaviour {
 
 		StreamAssignment stream = streamAssignmentDict[location.LocID];
 
-		nestAssignment.AssignWorkers(stream.UnassignWorkers(workerAssignIncrements));
-		if(stream.Count == 0)
+		stream.UnassignAnts(antAssignIncrements);
+		if(stream.AntsPerSec == 0)
 		{
 			DisconnectStreamAssignment(location);
 			location.haveAssignment = false;
 		}
     }
-    
-    public void HandleAntDeath(WorkerAnt deadAnt)
-    {
-/*        deadAnt.assignedLocation.RemoveAnt(deadAnt);
-        if(deadAnt is WorkerAnt)
-        {
-            workerAntPool.Enqueue((WorkerAnt)deadAnt);
-        }
-        else
-        {
-            Debug.Log("HandleAntDeath: ERROR - Unknown ant class");
-        }
-        deadAnt.transform.position = transform.position;*/
-    }
+
+	protected IEnumerator GameUpdate()
+	{
+		for(;;)
+		{
+			// Send ant packets for each stream assignment
+			foreach(StreamAssignment entry in streamAssignmentDict.Values)
+			{
+				nest.SendAntsTo(entry.AntsPerTick, entry.AssignedLocation);
+			}
+
+			// Update nest count
+			nest.upperText.text = nest.antsInNest + " ants";
+
+			// Update Network
+			NetworkManager.instance.LocationNetwork.NetworkUpdate();
+
+			yield return new WaitForSeconds(secondsPerGameTick);
+		}
+	}
+
+
 }
