@@ -20,6 +20,7 @@ public abstract class Path : MonoBehaviour
 	public Text travelingAText;
 	public Text travelingBText;
 	public Text rateText;
+	public AntParticleController antPartCtrllr;
 
     /// <summary>
     /// Location A of the path
@@ -121,6 +122,9 @@ public abstract class Path : MonoBehaviour
 	protected void Start () 
 	{
 		enabled = false;
+		antPartCtrllr.SetPathStatus(0,0);
+		antPartCtrllr.PercDensity = .25f; // TODO determine how this will be used
+		antPartCtrllr.LengthOfPath = pathLength;
 		UpdateText();
 	}
 	
@@ -144,12 +148,14 @@ public abstract class Path : MonoBehaviour
 		if(waitingOnSideA.Count == 0 && waitingOnSideB.Count == 0 &&
 		   travelingOnSideA.Count == 0 && travelingOnSideB.Count == 0)
 		{
-			// Do nothing if there are no ants here, update only if neede
+			// Do nothing if there are no ants here, update only if needed
 			if(capTickAverage != 0f)
 			{
 				capTickAverage = 0f;
 				UpdateText();
 			}
+
+			antPartCtrllr.SetPathStatus(0,0);
 
 			return;
 		}
@@ -224,6 +230,9 @@ public abstract class Path : MonoBehaviour
 
 		// Calculate Exponential Moving Average of capacity per tick
 		capTickAverage = (ExpRollingFilterAlpha * (fromSideA + fromSideB)) + (1.0f - ExpRollingFilterAlpha) * capTickAverage;
+
+		// Update the Ant Particle Emitter
+		antPartCtrllr.SetPathStatus(capTickAverage/Capacity, (((float) travelingOnSideA.Count)/((float) travelingOnSideA.Count + travelingOnSideB.Count)));
 
 		UpdateText();
 	}

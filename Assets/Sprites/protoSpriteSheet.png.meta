@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 0ee9d954e977af64f9ce35d29bad0cc2
-timeCreated: 1428364809
+timeCreated: 1430182862
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -10,6 +10,7 @@ TextureImporter:
     21300006: protoSpriteSheet_3
     21300008: protoSpriteSheet_4
     21300010: protoSpriteSheet_5
+    21300012: protoSpriteSheet_6
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -109,6 +110,16 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 64
+        y: 96
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: protoSpriteSheet_6
+      rect:
+        serializedVersion: 2
+        x: 128
         y: 96
         width: 64
         height: 64
