@@ -15,6 +15,7 @@ public class PrefabManager : MonoBehaviour {
 	// TODO Generalize and organize
 	public Nest nestPrefab;
 	public RottenApple applePrefab;
+	public Location emptyLocPrefab;
     public StraightPath straightPathPrefab;
     public StreamAssignment streamAssignmentPrefab;
 
@@ -56,6 +57,18 @@ public class PrefabManager : MonoBehaviour {
 		RottenApple newApple = Instantiate(applePrefab, position, Quaternion.identity) as RottenApple;
 		newApple.Init();
 		return newApple;
+	}
+
+	/// <summary>
+	/// Creates an Empty Location prefab at the given position,
+	/// </summary>
+	/// <returns>The spawned Empty Location gameobject</returns>
+	/// <param name="position">The position to spawn the gameobject at.</param>
+	public Location CreateEmptyLocationObject(Vector2 position)
+	{
+		Location emptyLoc = Instantiate(emptyLocPrefab, position, Quaternion.identity) as Location;
+		emptyLoc.Init();
+		return emptyLoc;
 	}
 
 	/// <summary>

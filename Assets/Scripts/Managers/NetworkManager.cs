@@ -36,12 +36,6 @@ public class NetworkManager : MonoBehaviour {
 	/// </summary>
 	private Nest nest;
 
-	//  this a temp creation method 
-	public Vector2[] appleVecList;
-
-	// TODO this is a temp creation method for testinh
-	public Vector2[] childrenVecList;
-
 	void Awake()
 	{
 		// Only have one in game
@@ -70,27 +64,68 @@ public class NetworkManager : MonoBehaviour {
 		this.nest = PrefabManager.instance.CreateNestObject(Vector2.zero);
 		this.nest.transform.SetParent(transform);
 		this.LocationNetwork = new Network();
+
+		Vector2[] firstRing = new Vector2[5];
+
+		firstRing[0].x = 3f;
+		firstRing[0].y = 0f;
+
+		firstRing[1].x = 0f;
+		firstRing[1].y = 2f;
+
+		firstRing[2].x = -2f;
+		firstRing[2].y = 0f;
+
+		firstRing[3].x = -1.5f;
+		firstRing[3].y = -2.5f;
+
+		firstRing[4].x = 1.5f;
+		firstRing[4].y = -2.5f;
 		
-		// TODO Temp Create network location, around nest
-		RottenApple[] tempApples = new RottenApple[appleVecList.Length];
-		for(int i = 0; i < appleVecList.Length; i++)
+		// TODO Temp Create network first ring location, around nest
+		Location[] tempLocs = new Location[firstRing.Length];
+		for(int i = 0; i < firstRing.Length; i++)
 		{
-			tempApples[i] = PrefabManager.instance.CreateAppleObject(appleVecList[i]);
-			tempApples[i].transform.SetParent(transform);
+			tempLocs[i] = PrefabManager.instance.CreateEmptyLocationObject(firstRing[i]);
+			tempLocs[i].transform.SetParent(transform);
 
             // Create network connections
-			CreateNetworkPath(this.nest, tempApples[i]);
+			CreateNetworkPath(this.nest, tempLocs[i]);
         }
 
-		// TODO Temp Create children nodes on first nest connected apple
-		RottenApple[] tempChildApples = new RottenApple[childrenVecList.Length];
-		for(int i = 0; i < childrenVecList.Length; i++)
+		// Connect ring together
+		Location prevLoc = tempLocs[tempLocs.Length-1];
+		foreach(Location loc in tempLocs)
 		{
-			tempChildApples[i] = PrefabManager.instance.CreateAppleObject(childrenVecList[i]);
-			tempChildApples[i].transform.SetParent(transform);
+			// Create network connections
+			CreateNetworkPath(prevLoc, loc);
+			prevLoc = loc;
+		}
+
+		Vector2[] secondRing = new Vector2[4];
+
+		secondRing[0].x = 4f;
+		secondRing[0].y = 2f;
+		
+		secondRing[1].x = -3f;
+		secondRing[1].y = 3f;
+		
+		secondRing[2].x = -3f;
+		secondRing[2].y = -2f;
+		
+		secondRing[3].x = 0f;
+		secondRing[3].y = -4f;
+
+		// TODO Temp Create network second ring location, around nest
+		RottenApple[] tempApples = new RottenApple[secondRing.Length];
+		for(int i = 0; i < secondRing.Length; i++)
+		{
+			tempApples[i] = PrefabManager.instance.CreateAppleObject(secondRing[i]);
+			tempApples[i].transform.SetParent(transform);
 			
 			// Create network connections
-			CreateNetworkPath(tempApples[0], tempChildApples[i]);
+			CreateNetworkPath(tempLocs[i], tempApples[i]);
+			CreateNetworkPath(tempLocs[i+1], tempApples[i]);
 		}
 
 		return this.nest;

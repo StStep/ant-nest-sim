@@ -20,6 +20,8 @@ public abstract class Path : MonoBehaviour
 	public Text travelingAText;
 	public Text travelingBText;
 	public Text rateText;
+	public SpriteRenderer animationTravelA;
+	public SpriteRenderer animationTravelB;
 
     /// <summary>
     /// Location A of the path
@@ -122,6 +124,9 @@ public abstract class Path : MonoBehaviour
 	{
 		enabled = false;
 		UpdateText();
+
+		animationTravelA.enabled = false;
+		animationTravelB.enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -194,6 +199,24 @@ public abstract class Path : MonoBehaviour
 				LocationA.Accept(travelingOnSideB[i]);
 				travelingOnSideB.RemoveAt(i);
 			}
+		}
+
+		if(travelingOnSideA.Count > 0) 
+		{
+			animationTravelA.enabled = true;
+		}
+		else
+		{
+			animationTravelA.enabled = false;
+		}
+
+		if(travelingOnSideB.Count > 0) 
+		{
+			animationTravelB.enabled = true;
+		}
+		else
+		{
+			animationTravelB.enabled = false;
 		}
 
 		if(fromSideA > waitingOnSideA.Count)

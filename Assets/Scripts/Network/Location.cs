@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// This class is for a location in the <see cref="Network"/> object
 /// </summary>
-public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Location>
+public class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Location>
 {
     /// <summary>
     /// The text object displayed above the location
@@ -73,8 +73,15 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
         _connectedPaths = new Dictionary<int, Path>();
         _locID = NetworkManager.GetNextLocID();
         
-        upperText.text = "";
-        lowerText.text = "";
+		if(upperText != null)
+		{
+			upperText.text = "";
+		}
+
+		if(lowerText != null)
+		{
+			lowerText.text = "";
+		}
     }
     
     protected virtual void Awake()
@@ -258,7 +265,10 @@ public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatabl
 		UpdateText();
 	}
 
-	protected abstract void UpdateText();
+	protected virtual void UpdateText()
+	{
+
+	}
 
 	/// <summary>
 	/// This handles what happens to the ant once it reaches this node as it's destination
