@@ -12,7 +12,7 @@ GameObject:
   - 114: {fileID: 11470330}
   - 114: {fileID: 11442460}
   - 58: {fileID: 5895282}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: nest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30,7 +30,7 @@ GameObject:
   - 223: {fileID: 22354280}
   - 114: {fileID: 11467118}
   - 114: {fileID: 11436250}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 451166}
   - 212: {fileID: 21213312}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: nodeRing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -63,7 +63,7 @@ GameObject:
   - 224: {fileID: 22483474}
   - 222: {fileID: 22296872}
   - 114: {fileID: 11421070}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: UpperText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -80,7 +80,7 @@ GameObject:
   - 224: {fileID: 22488606}
   - 222: {fileID: 22221020}
   - 114: {fileID: 11492374}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: LowerText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -107,7 +107,7 @@ Transform:
   m_GameObject: {fileID: 118752}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_Children:
   - {fileID: 22477300}
   - {fileID: 451166}
@@ -182,6 +182,7 @@ MonoBehaviour:
   upperText: {fileID: 11421070}
   lowerText: {fileID: 11492374}
   antBirthPerSec: 2
+  antsInNest: 0
 --- !u!114 &11467118
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -10,7 +10,7 @@ GameObject:
   - 224: {fileID: 22442958}
   - 222: {fileID: 22275884}
   - 114: {fileID: 11481154}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: UpperText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ GameObject:
   - 224: {fileID: 22403694}
   - 222: {fileID: 22230740}
   - 114: {fileID: 11479238}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: LowerText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   - 114: {fileID: 11483772}
   - 114: {fileID: 11484106}
   - 58: {fileID: 5886374}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: rottenApple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64,7 +64,7 @@ GameObject:
   - 223: {fileID: 22371042}
   - 114: {fileID: 11438920}
   - 114: {fileID: 11465132}
-  m_Layer: 5
+  m_Layer: 8
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -80,7 +80,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 461432}
   - 212: {fileID: 21213594}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: nodeRing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ Transform:
   m_GameObject: {fileID: 167494}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_Children:
   - {fileID: 22459946}
   - {fileID: 461432}

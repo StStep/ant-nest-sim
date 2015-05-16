@@ -67,20 +67,20 @@ public class NetworkManager : MonoBehaviour {
 
 		Vector2[] firstRing = new Vector2[5];
 
-		firstRing[0].x = 3f;
+		firstRing[0].x = 6f;
 		firstRing[0].y = 0f;
 
 		firstRing[1].x = 0f;
-		firstRing[1].y = 2f;
+		firstRing[1].y = 4f;
 
-		firstRing[2].x = -2f;
+		firstRing[2].x = -4f;
 		firstRing[2].y = 0f;
 
-		firstRing[3].x = -1.5f;
-		firstRing[3].y = -2.5f;
+		firstRing[3].x = -3f;
+		firstRing[3].y = -5f;
 
-		firstRing[4].x = 1.5f;
-		firstRing[4].y = -2.5f;
+		firstRing[4].x = 3f;
+		firstRing[4].y = -5f;
 		
 		// TODO Temp Create network first ring location, around nest
 		Location[] tempLocs = new Location[firstRing.Length];
@@ -104,17 +104,17 @@ public class NetworkManager : MonoBehaviour {
 
 		Vector2[] secondRing = new Vector2[4];
 
-		secondRing[0].x = 4f;
-		secondRing[0].y = 2f;
+		secondRing[0].x = 8f;
+		secondRing[0].y = 4f;
 		
-		secondRing[1].x = -3f;
-		secondRing[1].y = 3f;
+		secondRing[1].x = -6f;
+		secondRing[1].y = 6f;
 		
-		secondRing[2].x = -3f;
-		secondRing[2].y = -2f;
+		secondRing[2].x = -6f;
+		secondRing[2].y = -4f;
 		
 		secondRing[3].x = 0f;
-		secondRing[3].y = -4f;
+		secondRing[3].y = -8f;
 
 		// TODO Temp Create network second ring location, around nest
 		RottenApple[] tempApples = new RottenApple[secondRing.Length];

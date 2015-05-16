@@ -230,6 +230,10 @@ public class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Locatio
         {
             Debug.Log("You right clicked on a location");
         }
+		else
+		{
+			// Do nothing
+		}
     }
 
 	public void Accept(Ant ant)
