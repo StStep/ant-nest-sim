@@ -13,6 +13,7 @@ GameObject:
   - 124: {fileID: 12443360}
   - 81: {fileID: 8181642}
   - 114: {fileID: 11424810}
+  - 114: {fileID: 11451732}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -37,34 +38,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &183928
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 400582}
-  - 114: {fileID: 11498236}
-  m_Layer: 0
-  m_Name: InputManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &400582
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 183928}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 482730}
-  m_RootOrder: 0
 --- !u!4 &482044
 Transform:
   m_ObjectHideFlags: 1
@@ -76,7 +49,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 482730}
-  m_RootOrder: 1
+  m_RootOrder: 0
 --- !u!4 &482730
 Transform:
   m_ObjectHideFlags: 1
@@ -87,7 +60,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 400582}
   - {fileID: 482044}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -166,7 +138,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 11498236}
+        - m_Target: {fileID: 11451732}
           m_MethodName: DragStart
           m_Mode: 1
           m_Arguments:
@@ -184,7 +156,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 11498236}
+        - m_Target: {fileID: 11451732}
           m_MethodName: DragEnd
           m_Mode: 1
           m_Arguments:
@@ -202,7 +174,7 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 11498236}
+        - m_Target: {fileID: 11451732}
           m_MethodName: DragMove
           m_Mode: 1
           m_Arguments:
@@ -230,19 +202,18 @@ MonoBehaviour:
   m_EventMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &11498236
+--- !u!114 &11451732
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 183928}
+  m_GameObject: {fileID: 124794}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a83947e1333e447c6a9bb5c50901e79c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraTrans: {fileID: 482730}
-  dragScale: .00999999978
+  dragScale: .100000001
 --- !u!124 &12443360
 Behaviour:
   m_ObjectHideFlags: 1

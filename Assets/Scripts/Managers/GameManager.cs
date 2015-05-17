@@ -47,11 +47,10 @@ public class GameManager : MonoBehaviour {
 	{
 		nest = NetworkManager.instance.CreateNetwork();
 		nest.antsInNest = startAntAmount;
-		nest.upperText.text = nest.antsInNest + " ants";
 		StartCoroutine(GameUpdate());
 	}
 
-    private StreamAssignment ConnectStreamAssignment(AssignableLocation location)
+	public StreamAssignment ConnectStreamAssignment(AssignableLocation location)
     {
         StreamAssignment newStream;
         if(streamPool.Count != 0)
@@ -67,7 +66,7 @@ public class GameManager : MonoBehaviour {
         return newStream;
     }
 
-    private void DisconnectStreamAssignment(AssignableLocation location)
+    public void DisconnectStreamAssignment(AssignableLocation location)
     {
         StreamAssignment stream = streamAssignmentDict[location.LocID];
         streamAssignmentDict.Remove(location.LocID);
@@ -79,39 +78,6 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void LeftClick(AssignableLocation location)
-    {
-        StreamAssignment stream;
-        if(!location.haveAssignment)
-        {
-            stream = ConnectStreamAssignment(location);
-            location.haveAssignment = true;
-        }
-        else
-        {
-            stream = streamAssignmentDict[location.LocID];
-        }
-
-		stream.AssignAnts(antAssignIncrements);
-    }
-    
-    public void RightClick(AssignableLocation location)
-    {
-        if(!location.haveAssignment)
-        {
-			return;
-        }
-
-		StreamAssignment stream = streamAssignmentDict[location.LocID];
-
-		stream.UnassignAnts(antAssignIncrements);
-		if(stream.AntsPerSec == 0)
-		{
-			DisconnectStreamAssignment(location);
-			location.haveAssignment = false;
-		}
-    }
-
 	protected IEnumerator GameUpdate()
 	{
 		for(;;)
@@ -121,9 +87,6 @@ public class GameManager : MonoBehaviour {
 			{
 				nest.SendAntsTo(entry.AntsPerTick, entry.AssignedLocation);
 			}
-
-			// Update nest count
-			nest.upperText.text = nest.antsInNest + " ants";
 
 			// Update Network
 			NetworkManager.instance.LocationNetwork.NetworkUpdate();

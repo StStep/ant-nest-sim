@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// </summary>
 public abstract class AssignableLocation : Location 
 {
-    public bool haveAssignment;
+	protected Assignment assignment;
 
 	/// <summary>
 	/// This initializes this instance, for intializaing internal objects 
@@ -17,33 +17,54 @@ public abstract class AssignableLocation : Location
 	{
 		base.Init();
 		
-        haveAssignment = false;
+		assignment = null;
 	}
 	
 	protected override void Awake()
 	{
 		base.Awake();
 	}
-	
-	/// <summary>
-	/// This function should be called when a mouse clicks
-	/// up after clicking on the game object.
-	/// </summary>
-	/// <para>
-	/// TODO
-	/// </para>
-	public override void ClickUp()
+
+	protected override void LeftClick()
 	{
-		
-		if (clickStatus == ClickType.LeftClick)
+		if(assignment == null)
 		{
-            Debug.Log ("Left clicked on Rotten Apple ID " + LocID.ToString());
-            GameManager.instance.LeftClick(this);
+			InterfaceManager.instance.SelectLocation(this);
 		}
-		else if (clickStatus == ClickType.RightClick)
+		else
 		{
-            Debug.Log ("Right clicked on Rotten Apple ID " + LocID.ToString());
-            GameManager.instance.RightClick(this);
+			InterfaceManager.instance.SelectAssignment(this, assignment);
 		}
+	}
+
+	protected override void RightClick()
+	{
+		InterfaceManager.instance.Deselect();
+	}
+
+	public Assignment CreateStreamAssignment()
+	{
+		if(assignment != null)
+		{
+			Debug.Log ("Warning: Assignment already exists");
+		}
+		else 
+		{
+			assignment = GameManager.instance.ConnectStreamAssignment(this);
+		}
+
+		return assignment;
+	}
+
+	public void RemoveStreamAssignment()
+	{
+		GameManager.instance.DisconnectStreamAssignment(this);
+		assignment = null;
+		upperText.text = "";
+	}
+
+	public virtual void UpdateAssignmentText(int amount)
+	{
+		upperText.text = amount + " ants";
 	}
 }

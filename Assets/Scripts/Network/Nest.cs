@@ -51,35 +51,15 @@ public class Nest : Location {
 	{
 		base.Start ();
 
-		// Start the Nest update
-		StartCoroutine(NestUpdate());
 	}
+	
 
-	/// <summary>
-	/// This coroutine checks is used to manage the nest state. Ants are only
-    /// birthed if the food storage is greater than the reserve. If the base food rate
-    /// can't be taken from food storage, and queen dies, and this function exits.
-	/// </summary>
-	/// <returns>Returns IEnumerator, intended to be used as a coroutine.</returns>
-	protected IEnumerator NestUpdate()
+	public override void LocationUpdate ()
 	{
-        yield break;
-	}
+		base.LocationUpdate ();
 
-	/// <summary>
-	/// This function should be called when a mouse clicks
-	/// up after clicking on the game object.
-	/// </summary>
-	public override void ClickUp()
-	{
-		if (clickStatus == ClickType.LeftClick)
-		{
-			Debug.Log("You left clicked on a nest");
-		}
-		else if (clickStatus == ClickType.RightClick)
-		{
-			Debug.Log("You right clicked on a nest");
-		}
+		// Update nest count
+		upperText.text = antsInNest + " ants";
 	}
 
 	protected override void LetVisit(Ant ant)
@@ -92,6 +72,16 @@ public class Nest : Location {
 		}
 		antReusePool.Enqueue(ant);
 
+	}
+
+	protected override void LeftClick()
+	{
+		Debug.Log("Left clicked on nest");
+	}
+	
+	protected override void RightClick()
+	{
+		Debug.Log("Right clicked on nest");
 	}
 
 	/// <summary>

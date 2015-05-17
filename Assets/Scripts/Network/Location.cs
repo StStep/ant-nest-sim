@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// This class is for a location in the <see cref="Network"/> object
 /// </summary>
-public class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Location>
+public abstract class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Location>
 {
     /// <summary>
     /// The text object displayed above the location
@@ -17,7 +17,7 @@ public class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Locatio
     /// <summary>
     /// The text object displayed above the location
     /// </summary>
-    public Text lowerText;
+	public Text lowerText;
 
     /// <summary>
     ///  The game position of the node.
@@ -191,7 +191,7 @@ public class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Locatio
     /// This function should be called when a mouse clicks
     /// down on the game object
     /// </summary>
-    public virtual void ClickDown()
+    public void ClickDown()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -211,7 +211,7 @@ public class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Locatio
     /// This function cancels a click on the gameobject, should
     /// be called when an mouse curser leaves the gameobject.
     /// </summary>
-    public virtual void ClickCancel()
+    public void ClickCancel()
     {
         clickStatus = ClickType.NoClick;
     }
@@ -220,21 +220,25 @@ public class Location :MonoBehaviour, IEnumerable<Location> , IEquatable<Locatio
     /// This function should be called when a mouse clicks
     /// up after clicking on the game object.
     /// </summary>
-    public virtual void ClickUp()
+    public void ClickUp()
     {
         if (clickStatus == ClickType.LeftClick)
         {
-            Debug.Log("You left clicked on a location");
+			LeftClick();
         }
         else if (clickStatus == ClickType.RightClick)
         {
-            Debug.Log("You right clicked on a location");
+			RightClick();
         }
 		else
 		{
 			// Do nothing
 		}
     }
+
+	protected abstract void LeftClick();
+
+	protected abstract void RightClick();
 
 	public void Accept(Ant ant)
 	{

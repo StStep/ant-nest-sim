@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class InputManager : MonoBehaviour {
-
-	public Transform cameraTrans;
+public class CameraManager : MonoBehaviour {
+	
 	public float dragScale = .25f;
 
 	// Use this for initialization
@@ -41,9 +40,9 @@ public class InputManager : MonoBehaviour {
 		Vector2 curMosuePos = Input.mousePosition;
 		Vector2 mouseMove = curMosuePos - prevMousePos;
 
-		float newX = cameraTrans.position.x - mouseMove.x * dragScale;
-		float newY = cameraTrans.position.y - mouseMove.y * dragScale;
-		cameraTrans.position = new Vector3(newX, newY, cameraTrans.position.z);
+		float newX = this.transform.position.x - mouseMove.x * dragScale;
+		float newY = this.transform.position.y - mouseMove.y * dragScale;
+		this.transform.position = new Vector3(newX, newY, this.transform.position.z);
 
 		prevMousePos = Input.mousePosition;
 	}

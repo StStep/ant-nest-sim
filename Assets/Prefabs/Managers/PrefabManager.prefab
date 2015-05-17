@@ -41,7 +41,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nestPrefab: {fileID: 11442460, guid: 18e442d4b4f90024bb4095615e387ff1, type: 2}
   applePrefab: {fileID: 11483772, guid: e468d9c956afa0d44bf8c9f56dce7055, type: 2}
-  emptyLocPrefab: {fileID: 11486414, guid: 060f3f7daedbf4764a7839f5a92c8485, type: 2}
+  emptyLocPrefab: {fileID: 11430416, guid: 060f3f7daedbf4764a7839f5a92c8485, type: 2}
   straightPathPrefab: {fileID: 11439722, guid: fb39ba35830231f47a0358540ca976d8, type: 2}
   streamAssignmentPrefab: {fileID: 11434942, guid: 8d6e6ecdd015f3349a54284aef9168a4,
     type: 2}

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 public abstract class Assignment: MonoBehaviour
 {
+
 	protected AssignableLocation _assignedLoc;
 	public virtual AssignableLocation AssignedLocation
 	{
@@ -61,7 +62,12 @@ public abstract class Assignment: MonoBehaviour
 
     public virtual void Init()
     {
+
     }
+
+	public virtual void Awake()
+	{
+	}
 
 	// Use this for initialization
 	protected virtual void Start () 
@@ -80,19 +86,14 @@ public abstract class Assignment: MonoBehaviour
 		enabled = true;
 		_assignedLoc = location;
 		AntsPerSec = 0;
-		UpdateAssignmentText();
+		_assignedLoc.UpdateAssignmentText(AntsPerSec);
+		this.transform.position = _assignedLoc.transform.position;
 	}
 	
 	public virtual void LocationDisconnect()
 	{
 		enabled = false;
-		_assignedLoc.upperText.text = "";
 		_assignedLoc = null;
-	}
-
-	protected virtual void UpdateAssignmentText()
-	{
-		_assignedLoc.upperText.text = AntsPerSec + " Ants";
 	}
 
 	public virtual void AssignAnts(int amount)
@@ -100,7 +101,7 @@ public abstract class Assignment: MonoBehaviour
 		if(amount > 0)
 		{
 			AntsPerSec += amount;
-			UpdateAssignmentText();
+			_assignedLoc.UpdateAssignmentText(AntsPerSec);
 		}
 
 	}
@@ -121,6 +122,14 @@ public abstract class Assignment: MonoBehaviour
 			AntsPerSec -= amount;
 		}
 
-		UpdateAssignmentText();
+		_assignedLoc.UpdateAssignmentText(AntsPerSec);
+	}
+
+	public void Select()
+	{
+	}
+
+	public void Deselect()
+	{
 	}
 }

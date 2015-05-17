@@ -64,9 +64,9 @@ public class PrefabManager : MonoBehaviour {
 	/// </summary>
 	/// <returns>The spawned Empty Location gameobject</returns>
 	/// <param name="position">The position to spawn the gameobject at.</param>
-	public Location CreateEmptyLocationObject(Vector2 position)
+	public EmptyLocation CreateEmptyLocationObject(Vector2 position)
 	{
-		Location emptyLoc = Instantiate(emptyLocPrefab, position, Quaternion.identity) as Location;
+		EmptyLocation emptyLoc = Instantiate(emptyLocPrefab, position, Quaternion.identity) as EmptyLocation;
 		emptyLoc.Init();
 		return emptyLoc;
 	}

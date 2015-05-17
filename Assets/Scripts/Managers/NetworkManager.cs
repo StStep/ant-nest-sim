@@ -83,7 +83,7 @@ public class NetworkManager : MonoBehaviour {
 		firstRing[4].y = -5f;
 		
 		// TODO Temp Create network first ring location, around nest
-		Location[] tempLocs = new Location[firstRing.Length];
+		EmptyLocation[] tempLocs = new EmptyLocation[firstRing.Length];
 		for(int i = 0; i < firstRing.Length; i++)
 		{
 			tempLocs[i] = PrefabManager.instance.CreateEmptyLocationObject(firstRing[i]);
@@ -94,8 +94,8 @@ public class NetworkManager : MonoBehaviour {
         }
 
 		// Connect ring together
-		Location prevLoc = tempLocs[tempLocs.Length-1];
-		foreach(Location loc in tempLocs)
+		EmptyLocation prevLoc = tempLocs[tempLocs.Length-1];
+		foreach(EmptyLocation loc in tempLocs)
 		{
 			// Create network connections
 			CreateNetworkPath(prevLoc, loc);

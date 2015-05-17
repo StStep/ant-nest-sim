@@ -228,7 +228,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upperText: {fileID: 11481154}
   lowerText: {fileID: 11479238}
-  haveAssignment: 0
 --- !u!114 &11484106
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -374,7 +373,7 @@ Canvas:
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
-  m_SortingLayerID: 761366953
+  m_SortingLayerID: 1610410527
   m_SortingOrder: 1
 --- !u!224 &22403694
 RectTransform:
